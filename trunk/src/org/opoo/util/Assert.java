@@ -1,5 +1,5 @@
 /*
- * $Id: Assert.java 1.0 2008年1月3日 下午05时37分36秒$
+ * $Id$
  *
  * Copyright 2002-2007 the original author or authors.
  *
