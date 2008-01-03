@@ -1,5 +1,5 @@
 /*
- * $Id: ArrayUtils.java $
+ * $Id$
  *
  * Copyright 2006-2008 Alex Lin(alex@opoo.org). All rights reserved.
  *
