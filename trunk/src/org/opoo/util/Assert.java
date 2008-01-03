@@ -52,7 +52,6 @@ import java.util.Map;
  * @author Rob Harrop
  */
 public abstract class Assert {
-
     /**
      * Assert a boolean expression, throwing <code>IllegalArgumentException</code>
      * if the test result is <code>false</code>.
