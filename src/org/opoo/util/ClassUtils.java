@@ -26,7 +26,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * 一个反射机制基本函数工具类。
- * 
+ *
  * @author Alex Lin
  * @version 1.0
  */
@@ -92,20 +91,11 @@ public abstract class ClassUtils {
 
     public static Class forName(String name, ClassLoader contextClassLoader) throws
             ClassNotFoundException {
-        // try
-        // {
-        // ClassLoader contextClassLoader =
-		// Thread.currentThread().getContextClassLoader();
         if (contextClassLoader != null) {
             return contextClassLoader.loadClass(name);
         } else {
             return Class.forName(name);
         }
-        // }
-        // catch (Exception e)
-        // {
-        // return Class.forName(name);
-        // }
     }
 
     public static boolean isPublic(Class clazz, Member member) {
@@ -175,17 +165,13 @@ public abstract class ClassUtils {
         // System.out.println(map.get("id").getClass());
         // org.apache.commons.beanutils.BeanUtils.populate(obj, map);
 
-
-
         // 2.效率比较低
         Set set = map.entrySet();
         Iterator it = set.iterator();
         while (it.hasNext()) {
             Map.Entry e = (Map.Entry) it.next();
             String name = (String) e.getKey();
-            // log.info("populate property :" + name + " : " + e.getValue());
             setProperty(obj, name, e.getValue());
-            // System.out.println("After set property:" + obj);
         }
     }
 
@@ -207,17 +193,6 @@ public abstract class ClassUtils {
         return a;
     }
 
-    /**
-	 * 根据属性名称在对象中查找属性的值，使用反射机制。
-	 * 
-	 * @param entity
-	 *            Object
-	 * @param names
-	 *            String[]
-	 * @param type
-	 *            Class
-	 * @return Object
-	 */
     public static Object getProperties(final Object entity,
                                        final String[] names,
                                        final Class type) {
@@ -231,63 +206,11 @@ public abstract class ClassUtils {
 
     public static void setProperty(final Object entity, String name,
                                    Object value) {
-
         try {
-            // System.out.println(entity);
-            // System.out.println(name);
-            // System.out.println(value);
             PropertyUtils.setProperty(entity, name, value);
         } catch (Exception ex) {
-            // ex.printStackTrace();
             log.error(ex);
         }
-    }
-
-    public static TwoHashMap describe(Object bean, boolean getValue) {
-        if (bean == null) {
-            return new TwoHashMap();
-        }
-
-        TwoHashMap description = new TwoHashMap();
-        // if (bean instanceof DynaBean) {
-        // DynaProperty descriptors[] =
-        // ((DynaBean) bean).getDynaClass().getDynaProperties();
-        // for (int i = 0; i < descriptors.length; i++) {
-        // String name = descriptors[i].getName();
-        // description.put(name, ReflectHelper.getProperty(bean, name));
-        // }
-        // } else {
-        PropertyDescriptor descriptors[] = PropertyUtils.getPropertyDescriptors(
-                bean);
-        for (int i = 0; i < descriptors.length; i++) {
-            String name = descriptors[i].getName();
-            if (descriptors[i].getReadMethod() != null &&
-                descriptors[i].getWriteMethod() != null) {
-                description.put(name, descriptors[i].getPropertyType());
-                if (getValue)
-                    description.put2(name, getProperty(bean, name));
-            }
-        }
-        // }
-        return (description);
-    }
-
-    public static Map describe(Class clazz) {
-        if (clazz == null) {
-            return new HashMap();
-        }
-
-        TwoHashMap description = new TwoHashMap();
-        PropertyDescriptor descriptors[] = PropertyUtils.getPropertyDescriptors(
-                clazz);
-        for (int i = 0; i < descriptors.length; i++) {
-            String name = descriptors[i].getName();
-            if (descriptors[i].getReadMethod() != null &&
-                descriptors[i].getWriteMethod() != null) {
-                description.put(name, descriptors[i].getPropertyType());
-            }
-        }
-        return (description);
     }
 
     public static String getPureName(Class clazz) {
@@ -300,18 +223,16 @@ public abstract class ClassUtils {
     }
 
     /**
-	 * 为了解决向低版本的兼容问题，JDK1.4-不支持Class.getSimpleName()
-	 * 
-	 * @param clazz
-	 *            Class
-	 * @return String
-	 */
+     * 为了解决向低版本的兼容问题，JDK1.4-不支持Class.getSimpleName()
+     *
+     * @param clazz  Class
+     * @return String
+     */
     public static String getSimpleName(Class clazz) {
         try {
-            Method m = clazz.getClass().getMethod("getSimpleName");
+            Method m = clazz.getClass().getMethod("getSimpleName", new Class[]{});
             return (String) m.invoke(clazz, (Object[])null);
         } catch (Exception ex) {
-            // System.out.println(ex);
             return getPureName(clazz);
         }
     }
@@ -392,24 +313,6 @@ public abstract class ClassUtils {
         }
     }
 
-    // public static final String PROPERTY_GET_EXCEPTION =
-    // "exception getting property value with CGLIB (set
-	// hibernate.cglib.use_reflection_optimizer=false for more info)";
-
-    // public static final String PROPERTY_SET_EXCEPTION =
-    // "exception setting property value with CGLIB (set
-	// hibernate.cglib.use_reflection_optimizer=false for more info)";
-
-    /*
-	 * public static void main(String[] args) { Map map = new
-	 * java.util.HashMap(); map.put("id", new Integer("1")); map.put("desc",
-	 * "Description"); map.put("name", "Name"); map.put("d", new
-	 * java.util.Date()); System.out.println(map); Object obj =
-	 * newInstance("com.lcql.application.bean.Tab1"); System.out.println(obj);
-	 * //setProperty(obj, "id", map.get("id")); populate(obj, map);
-	 * System.out.println(obj); }
-	 */
-
 
 
     public static Object createObject(Map properties, Class[] interfaceClasses) {
@@ -477,7 +380,7 @@ public abstract class ClassUtils {
 	 * Determine whether the {@link Class} identified by the supplied name is
 	 * present and can be loaded. Will return <code>false</code> if either the
 	 * class or one of its dependencies is not present or cannot be loaded.
-	 * 
+	 *
 	 * @param className
 	 *            the name of the class to check
 	 * @param classLoader
@@ -537,7 +440,7 @@ public abstract class ClassUtils {
             }
         }
 
-        protected Class<?> findClass(String name) throws ClassNotFoundException {
+        protected Class findClass(String name) throws ClassNotFoundException {
             if (name.indexOf(".") != -1)
                 throw new ClassNotFoundException(name);
 

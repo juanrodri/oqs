@@ -221,19 +221,6 @@ public abstract class ArrayUtils {
 	}
     }
 
-    /**
-     * 查找一个对象在数组中的位置。
-     * @param array Object[]
-     * @param object Object
-     * @return int
-     */
-    public static int indexOf(Object[] array, Object object) {
-	for (int i = 0; i < array.length; i++) {
-	    if (array[i].equals(object))
-		return i;
-	}
-	return -1;
-    }
 
     /**
      * 将数组转化成字符串数组。
@@ -385,17 +372,6 @@ public abstract class ArrayUtils {
 	return result;
     }
 
-    public static String toString(Object[] array) {
-	StringBuffer sb = new StringBuffer();
-	sb.append("[");
-	for (int i = 0; i < array.length; i++) {
-	    sb.append(array[i]);
-	    if (i < array.length - 1)
-		sb.append(",");
-	}
-	sb.append("]");
-	return sb.toString();
-    }
 
     public static boolean isAllNegative(int[] array) {
 	for (int i = 0; i < array.length; i++) {
@@ -460,105 +436,6 @@ public abstract class ArrayUtils {
 	    collection.add(array[i]);
 	}
     }
-
-    public static int[] getBatchSizes(int maxBatchSize) {
-	int batchSize = maxBatchSize;
-	int n = 1;
-	while (batchSize > 1) {
-	    batchSize = getNextBatchSize(batchSize);
-	    n++;
-	}
-	int[] result = new int[n];
-	batchSize = maxBatchSize;
-	for (int i = 0; i < n; i++) {
-	    result[i] = batchSize;
-	    batchSize = getNextBatchSize(batchSize);
-	}
-	return result;
-    }
-
-    private static int getNextBatchSize(int batchSize) {
-	if (batchSize <= 10) {
-	    return batchSize - 1; //allow 9,8,7,6,5,4,3,2,1
-	} else if (batchSize / 2 < 10) {
-	    return 10;
-	} else {
-	    return batchSize / 2;
-	}
-    }
-
-    private static int SEED = 23;
-    private static int PRIME_NUMER = 37;
-
-    /**
-     * calculate the array hash (only the first level)
-     * @param array Object[]
-     * @return int
-     */
-    public static int hash(Object[] array) {
-	int length = array.length;
-	int seed = SEED;
-	for (int index = 0; index < length; index++) {
-	    seed = hash(seed, array[index] == null ? 0 : array[index].hashCode());
-	}
-	return seed;
-    }
-
-
-    /**
-     * calculate the array hash (only the first level)
-     * @param array char[]
-     * @return int
-     */
-    public static int hash(char[] array) {
-	int length = array.length;
-	int seed = SEED;
-	for (int index = 0; index < length; index++) {
-	    seed = hash(seed, (int) array[index]);
-	}
-	return seed;
-    }
-
-    /**
-     * calculate the array hash (only the first level)
-     * @param bytes byte[]
-     * @return int
-     */
-    public static int hash(byte[] bytes) {
-	int length = bytes.length;
-	int seed = SEED;
-	for (int index = 0; index < length; index++) {
-	    seed = hash(seed, (int) bytes[index]);
-	}
-	return seed;
-    }
-
-    private static int hash(int seed, int i) {
-	return PRIME_NUMER * seed + i;
-    }
-
-
-    /**
-     * Compare 2 arrays only at the first level
-     * @param o1 Object[]
-     * @param o2 Object[]
-     * @return boolean
-     */
-    public static boolean isEquals(Object[] o1, Object[] o2) {
-	if (o1 == o2)
-	    return true;
-	if (o1 == null || o2 == null)
-	    return false;
-	int length = o1.length;
-	if (length != o2.length)
-	    return false;
-	for (int index = 0; index < length; index++) {
-	    if (!o1[index].equals(o2[index]))
-		return false;
-	}
-	return true;
-    }
-
 
     /**
      * Compare 2 arrays only at the first level

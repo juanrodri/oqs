@@ -21,6 +21,8 @@ package org.opoo.util;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Assertion utility class that assists in validating arguments.
  * Useful for identifying programmer errors early and clearly at runtime.
@@ -130,10 +132,9 @@ public abstract class Assert {
      * <pre class="code">Assert.hasLength(name, "Name must not be empty");</pre>
      * @param text the String to check
      * @param message the exception message to use if the assertion fails
-     * @see StringUtils#hasLength
      */
-    public static void hasLength(String text, String message) {
-        if (!StringUtils.hasLength(text)) {
+    public static void notEmpty(String text, String message) {
+        if (StringUtils.isEmpty(text)) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -143,10 +144,9 @@ public abstract class Assert {
      * it must not be <code>null</code> and not the empty String.
      * <pre class="code">Assert.hasLength(name);</pre>
      * @param text the String to check
-     * @see StringUtils#hasLength
      */
-    public static void hasLength(String text) {
-        hasLength(text,
+    public static void notEmpty(String text) {
+        notEmpty(text,
                   "[Assertion failed] - this String argument must have length; it must not be <code>null</code> or empty");
     }
 
@@ -156,10 +156,9 @@ public abstract class Assert {
      * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
      * @param text the String to check
      * @param message the exception message to use if the assertion fails
-     * @see StringUtils#hasText
      */
-    public static void hasText(String text, String message) {
-        if (!StringUtils.hasText(text)) {
+    public static void notBlank(String text, String message) {
+        if (StringUtils.isBlank(text)) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -169,10 +168,9 @@ public abstract class Assert {
      * be <code>null</code> and must contain at least one non-whitespace character.
      * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
      * @param text the String to check
-     * @see StringUtils#hasText
      */
-    public static void hasText(String text) {
-        hasText(text,
+    public static void notBlank(String text) {
+        notBlank(text,
                 "[Assertion failed] - this String argument must have text; it must not be <code>null</code>, empty, or blank");
     }
 
@@ -185,8 +183,8 @@ public abstract class Assert {
      */
     public static void doesNotContain(String textToSearch, String substring,
                                       String message) {
-        if (StringUtils.hasLength(textToSearch) &&
-            StringUtils.hasLength(substring) &&
+        if (StringUtils.isNotEmpty(textToSearch) &&
+            StringUtils.isNotEmpty(substring) &&
             textToSearch.indexOf(substring) != -1) {
             throw new IllegalArgumentException(message);
         }
@@ -286,7 +284,6 @@ public abstract class Assert {
      * @param clazz the required class
      * @param obj the object to check
      * @throws IllegalArgumentException if the object is not an instance of clazz
-     * @see Class#isInstance
      */
     public static void isInstanceOf(Class clazz, Object obj) {
         isInstanceOf(clazz, obj, "");
@@ -302,7 +299,6 @@ public abstract class Assert {
      * normally end in a ": " or ". " so that the function generate message looks
      * ok when prepended to it.
      * @throws IllegalArgumentException if the object is not an instance of clazz
-     * @see Class#isInstance
      */
     public static void isInstanceOf(Class type, Object obj, String message) {
         notNull(type, "Type to check against must not be null");
