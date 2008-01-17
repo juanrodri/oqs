@@ -17,10 +17,10 @@
  */
 package org.opoo.oqs.type;
 
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.io.Serializable;
 
 /**
  * Defines a mapping from a Java type to an JDBC datatype. This interface is intended to

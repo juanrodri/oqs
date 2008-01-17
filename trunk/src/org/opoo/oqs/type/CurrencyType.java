@@ -101,7 +101,7 @@ public class CurrencyType extends ImmutableType implements LiteralType {
             SQLException {
         Object code;
         try {
-            code = CURRENCY_GET_CODE.invoke(value, null);
+            code = CURRENCY_GET_CODE.invoke(value, (Object[])null);
         } catch (Exception e) {
             throw new RuntimeException("Could not get Currency code", e);
         }
@@ -116,7 +116,7 @@ public class CurrencyType extends ImmutableType implements LiteralType {
 
     public String toString(Object value) {
         try {
-            return (String) CURRENCY_GET_CODE.invoke(value, null);
+            return (String) CURRENCY_GET_CODE.invoke(value, (Object[])null);
         } catch (Exception e) {
             throw new RuntimeException("Could not get Currency code", e);
         }
@@ -125,7 +125,7 @@ public class CurrencyType extends ImmutableType implements LiteralType {
     public String toSQLString(Object value) throws Exception {
         String code;
         try {
-            code = (String) CURRENCY_GET_CODE.invoke(value, null);
+            code = (String) CURRENCY_GET_CODE.invoke(value, (Object[])null);
         } catch (Exception e) {
             throw new RuntimeException("Could not get Currency code", e);
         }

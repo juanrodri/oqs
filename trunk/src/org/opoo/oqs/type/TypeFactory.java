@@ -44,7 +44,7 @@ public class TypeFactory {
     private static final Map BASIC_TYPES;
 
     static {
-        HashMap basics = new HashMap();
+        Map basics = new HashMap();
         basics.put(boolean.class.getName(), Type.BOOLEAN);
         basics.put(long.class.getName(), Type.LONG);
         basics.put(short.class.getName(), Type.SHORT);
