@@ -22,10 +22,10 @@ package org.opoo.oqs;
  * The project's version.
  *
  * @author Alex Lin(alex@opoo.org)
- * @version 0.2
+ * @version 1.0
  */
-public class OQSVersion {
-    private static Package pkg = OQSVersion.class.getPackage();
+public class Oqs {
+    private static Package pkg = Oqs.class.getPackage();
     public static String getImplementationVendor() {
         return (pkg != null ? pkg.getImplementationVendor() : null);
     }
@@ -36,5 +36,21 @@ public class OQSVersion {
 
     public static String getImplementationVersion() {
         return (pkg != null ? pkg.getImplementationVersion() : null);
+    }
+
+    public static String getSpecificationVersion() {
+        return (pkg != null ? pkg.getSpecificationVersion() : null);
+    }
+
+    public static String getSpecificationVendor() {
+        return (pkg != null ? pkg.getSpecificationVendor() : null);
+    }
+
+    public static String getSpecificationTitle() {
+        return (pkg != null ? pkg.getSpecificationTitle() : null);
+    }
+
+    public static String getDescription() {
+	return "Simple O/R Mapping & JDBC Extensions";
     }
 }
