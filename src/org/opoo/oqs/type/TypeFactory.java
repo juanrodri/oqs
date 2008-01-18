@@ -118,7 +118,6 @@ public class TypeFactory {
      * @return Type
      */
     public static Type guessType(String classname) {
-        //System.out.println("Guess type: " + classname);
         return (Type) BASIC_TYPES.get(classname);
     }
 

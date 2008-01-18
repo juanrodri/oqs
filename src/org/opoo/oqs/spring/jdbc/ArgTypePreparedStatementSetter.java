@@ -56,7 +56,6 @@ public class ArgTypePreparedStatementSetter implements PreparedStatementSetter {
         }
         this.args = args;
         this.types = types;
-        //System.out.println("Using PreparedStatementSetter: " + this);
     }
 
     /**

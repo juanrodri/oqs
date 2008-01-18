@@ -73,7 +73,6 @@ public class SingleProperty extends SimpleProperty implements PropertyTypeAware 
 
     public String toString() {
         String s = super.toString();
-        //System.out.println("Sigle:" + index + ", " + s);
         return s;
     }
 }

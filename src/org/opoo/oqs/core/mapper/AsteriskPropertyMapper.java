@@ -115,7 +115,6 @@ public final class AsteriskPropertyMapper extends SinglePropertyMapper implement
     }
 
     public String toString() {
-        //System.out.println(ap.getStartIndex() + ", " + ap.getColumnCount());
         return ap.getString();
     }
 }

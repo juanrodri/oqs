@@ -44,10 +44,6 @@ import org.opoo.util.ClassUtils;
 public abstract class AbstractQueryFactory implements QueryFactory,
         DataSourceAware {
     private static Log log = LogFactory.getLog(QueryFactory.class);
-    private static Class clazz = null;
-    private static String factoryClassName =
-            "oeg.opoo.oqs.spring.SpringQueryFactoryImpl";
-
     private DataSource dataSource;
     private ConnectionManager connectionManager;
 
@@ -58,15 +54,16 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     int debugLevel = 0;
     ClassLoader beanClassLoader = null;
 
+    static {
+	log.info("Initializing " + Oqs.getSpecificationTitle()
+	 + ": " + Oqs.getSpecificationVersion());
+	System.out.println(Oqs.getOqsInfo());
+    }
+
     public AbstractQueryFactory() {
-        log.info("Initialize " + Oqs.getSpecificationTitle()
-                 + " : " + Oqs.getSpecificationVersion());
-        System.out.println("***************************************************************");
-        System.out.println("*  " + Oqs.getImplementationTitle() + " - " + Oqs.getDescription());
-        System.out.println("*  Version  : " + Oqs.getImplementationVersion());
-        System.out.println("*  Instance : " + getClass().getName());
-        System.out.println("*  Copyright (c) 2006-2008 Alex Lin (alex@opoo.org).");
-        System.out.println("***************************************************************");
+        if (log.isDebugEnabled()) {
+            log.debug("OQS QueryFactory: " + getClass().getName());
+        }
     }
 
     public AbstractQueryFactory(DataSource dataSource) {
@@ -117,10 +114,15 @@ public abstract class AbstractQueryFactory implements QueryFactory,
      * @param classname String
      * @throws CannotCreateQueryFactoryException
      */
-    public void setDialectClass(String classname) throws
+    public void setDialectClassName(String classname) throws
             CannotCreateQueryFactoryException {
         try {
-            dialect = (Dialect) ClassUtils.newInstance(classname);
+            Object object = ClassUtils.newInstance(classname);
+            if (object instanceof org.hibernate.dialect.Dialect) {
+                setDialect((org.hibernate.dialect.Dialect) object);
+            } else {
+                dialect = (Dialect) object;
+            }
         } catch (Exception ex) {
             throw new CannotCreateQueryFactoryException(
                     "Can not create Dialect.", ex);
@@ -131,8 +133,8 @@ public abstract class AbstractQueryFactory implements QueryFactory,
         this.dialect = dialect;
     }
 
-    public void setDialect(org.hibernate.dialect.Dialect d) {
-        setDialect(new HibernateDialectWrapper(d));
+    public void setDialect(org.hibernate.dialect.Dialect dialect) {
+        setDialect(new HibernateDialectWrapper(dialect));
     }
 
     public void setBeanClassLoader(ClassLoader classLoader) {
@@ -151,64 +153,24 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     }
 
 
-    /**
-     * 设置默认的QueryFactory实现类。
-     *
-     * @param factoryClassName String
-     */
-    public static void setFactoryClassName(String factoryClassName) {
-        AbstractQueryFactory.factoryClassName = factoryClassName;
-        AbstractQueryFactory.clazz = null;
-        if (log.isInfoEnabled()) {
-            log.info("Using QueryFactory class " + factoryClassName);
-        }
-    }
 
-    /**
-     * 根据给定的<tt>DataSource</tt>使用默认的<tt>QueryFactory</tt>实现类创建
-     * <tt>QueryFactory</tt>实例。
-     *
-     * <pre>
-     * Sample:
-     *   DataSource dataSource = ...;
-     *   String dialectClass = "org.opoo.oqs.dialect.MySQLDialect";
-     *   AbstractQueryFactory.setFactoryClassName(
-     *     "org.opoo.oqs.impl.QueryFactoryImpl");
-     *
-     *   QueryFactory qf = AbstractQueryFactory.createQueryFactory(dataSource,
-     *    dialectClass);
-     *
-     * </pre>
-     * @param dataSource DataSource
-     * @param dialectClass String
-     * @return QueryFactory
-     * @throws CannotCreateQueryFactoryException
-     */
-    public static QueryFactory createQueryFactory(DataSource dataSource,
-                                                  String dialectClass) throws
+
+
+    private static AbstractQueryFactory createQueryFactory(String
+            factoryClassName) throws
             CannotCreateQueryFactoryException {
         try {
-            if (clazz == null) {
-                clazz = ClassUtils.forName(factoryClassName,
-                                           AbstractQuery.class.getClassLoader());
-                //clazz = RequestUtils.applicationClass(factoryClass);
-            }
-            AbstractQueryFactory factory = (AbstractQueryFactory) clazz.
-                                           newInstance();
-            factory.setDataSource(dataSource);
-            factory.setDialectClass(dialectClass);
-
-            if (log.isDebugEnabled()) {
-                log.debug("QueryFactory[" + factoryClassName + "] created.");
-            }
-            return factory;
-        } catch (Throwable t) {
-            log.error("CacheFactory.createFactory", t);
+            Class clazz = ClassUtils.forName(factoryClassName,
+                                             AbstractQuery.class.getClassLoader());
+            return (AbstractQueryFactory) clazz.newInstance();
+        } catch (Exception ex) {
+            log.error("CacheFactory.createFactory", ex);
             throw new CannotCreateQueryFactoryException(
                     "Cannot create QueryFactory, " +
-                    factoryClassName, t);
+                    factoryClassName, ex);
         }
     }
+
 
     /**
      * 用指定的<tt>QueryFactory</tt>实现类全名和给定的参数-值 Map创建
@@ -216,7 +178,7 @@ public abstract class AbstractQueryFactory implements QueryFactory,
      * <pre>
      * Sample:
      *  DataSource dataSource = ...;
-     *  String className = "org.opoo.oqs.impl.SpringJdbcQueryFactoryImpl";
+     *  String className = "org.opoo.oqs.spring.SpringQueryFactoryImpl";
      *  Map map = new HashMap();
      *  map.put("dataSource", dataSource);
      *  *** 当使用ConnectionManager的其他实现时，请用map.put("connectionManager",
@@ -235,14 +197,9 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     public static QueryFactory createQueryFactory(String factoryClassName,
                                                   Map properties) throws
             CannotCreateQueryFactoryException {
-        if (log.isInfoEnabled()) {
-            log.info("Using QueryFactory: " + factoryClassName);
-        }
 
         try {
-            AbstractQueryFactory qf =
-                    (AbstractQueryFactory) ClassUtils.newInstance(
-                    factoryClassName);
+            AbstractQueryFactory qf = AbstractQueryFactory.createQueryFactory(factoryClassName);
             if (qf != null) {
                 ClassUtils.populate(qf, properties);
                 if (log.isDebugEnabled()) {

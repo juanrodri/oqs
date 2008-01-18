@@ -59,7 +59,6 @@ public class TransactionSupportConnectionManager implements ConnectionManager,
 
         Connection conn = (Connection) TransactionSynchronizationManager.
                           getResource(dataSource);
-        //System.out.println("getConnection");
         if (conn != null) {
             log.debug("Get connection from ThreadLocal.");
         } else { //(conn == null)
@@ -74,7 +73,6 @@ public class TransactionSupportConnectionManager implements ConnectionManager,
         }
         Connection conn = (Connection) TransactionSynchronizationManager.
                           getResource(dataSource);
-        //System.out.println("releaseConnection");
         if (conn != null && (con == conn || conn.equals(con))) {
             log.debug("Connection in Transaction, do not close.");
         } else {
