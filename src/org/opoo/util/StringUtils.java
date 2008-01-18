@@ -100,7 +100,6 @@ public abstract class StringUtils{
             //找到倒数第一个非汉字字符的位置
             if (bytes[i] > 0)
                 break;
-            //System.out.println((int)bytes[i]);
         }
         if ((len - i) % 2 == 1)
             return new String(bytes, 0, len);
@@ -214,7 +213,6 @@ public abstract class StringUtils{
      *
      * @param bytes byte[]
      * @return String
-     * @see org.apache.commons.codec.binary.Hex#encodeHex()
      */
     public static String encodeHex(byte[] bytes) {
         StringBuffer sb = new StringBuffer();
@@ -232,7 +230,6 @@ public abstract class StringUtils{
      *
      * @param hex String
      * @return byte[]
-     * @see org.apache.commons.codec.binary.Hex#decodeHex()
      */
     public static byte[] decodeHex(String hex) {
         if (hex.length() % 2 != 0) {

@@ -162,7 +162,6 @@ public abstract class ClassUtils {
     public static void populate(final Object obj, Map map) {
         // 1.简单但容易出问题
         // BeanUtils.populate(obj, map);
-        // System.out.println(map.get("id").getClass());
         // org.apache.commons.beanutils.BeanUtils.populate(obj, map);
 
         // 2.效率比较低
@@ -333,7 +332,6 @@ public abstract class ClassUtils {
 
         public Object invoke(Object proxy, Method method, Object[] args) throws
                 Throwable {
-            // System.out.println("Proxy: " + proxy.getClass());
             String methodName = method.getName();
             if (methodName.startsWith("get")) {
                 return map.get(getPropertyName(methodName));
@@ -357,7 +355,6 @@ public abstract class ClassUtils {
             }
 
             // String mn = method.toGenericString();
-            // System.out.println(method.getName());
             // return null;
             throw new UnsupportedOperationException(methodName);
         }
