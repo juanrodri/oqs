@@ -116,7 +116,6 @@ public abstract class AbstractMultiPropertyMapper extends SimpleProperty impleme
             if (i < n - 1) {
                 sb.append(", ");
             }
-            //System.out.println(mappers[i].getClass());
         }
 
         /**

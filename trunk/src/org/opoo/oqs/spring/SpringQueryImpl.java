@@ -105,7 +105,6 @@ public class SpringQueryImpl extends AbstractQuery {
      * @see AbstractQuery#list
      */
     protected List doList() throws QueryException {
-        //System.out.println(getSql());
         //return (List) jdbcTemplate.query(getSql(), valueArray(), new ListResultSetExtractor(this));
         final PreparedStatementSetter pss = new ArgTypePreparedStatementSetter(
                 valueArray(), typeArray());

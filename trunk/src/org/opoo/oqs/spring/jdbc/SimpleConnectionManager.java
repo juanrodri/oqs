@@ -67,15 +67,6 @@ public class SimpleConnectionManager implements ConnectionManager,
      * @see JdbcUtils#closeConnection
      */
     public void releaseConnection(Connection con) {
-        /*
-             try
-             {
-          System.out.println("AutoCommit() = " + con.getAutoCommit());
-             }
-             catch (SQLException ex)
-             {
-          ex.printStackTrace();
-             }*/
         JdbcUtils.closeConnection(con);
     }
 

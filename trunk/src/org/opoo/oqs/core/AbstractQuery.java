@@ -116,7 +116,6 @@ public abstract class AbstractQuery implements Query {
         this.msql = queryString;
 
         if (debugLevel > 1) {
-            //System.out.println("[RET]: " + resultType);
             System.out.println("[SQS]: " + queryString);
         }
         initialize();
@@ -143,7 +142,6 @@ public abstract class AbstractQuery implements Query {
     protected void before() {
         translateMsqlIfNecessary();
         //verifyParameters();
-        //System.out.println(values);
         verifyPositionalParameters(false);
         verifyNamedParameters();
         processSQL(false);
@@ -217,7 +215,6 @@ public abstract class AbstractQuery implements Query {
         //return doInsert();
 
         String qs = getSql();
-        //System.out.println(qs);
         if (dialect.supportsInsertSelectIdentity()) {
             qs = dialect.appendIdentitySelectToInsert(qs);
             if (debugLevel > 1) {
@@ -335,7 +332,6 @@ public abstract class AbstractQuery implements Query {
         if (debugLevel > 1) {
             System.out.println("[TQS]: " + qs);
         }
-        //System.out.println(namedParams);
 
         List theValues = new ArrayList();
         List theTypes = new ArrayList();
@@ -348,8 +344,7 @@ public abstract class AbstractQuery implements Query {
                                                  QS_SEPARATORS);
         while (st.hasMoreTokens()) {
             String str = st.nextToken();
-            //System.out.println(str);
-            if (str.startsWith("?")) {
+             if (str.startsWith("?")) {
                 theValues.add(values.get(valuesIndex++));
                 theTypes.add(types.get(typesIndex++));
             } else if (str.startsWith(QueryStringHelper.QS_VARIABLE_PREFIX)) {
@@ -368,10 +363,6 @@ public abstract class AbstractQuery implements Query {
         values = theValues;
         types = theTypes;
         sql = qs;
-
-        //System.out.println("[SQL] " + sql);
-        //System.out.println("[values] " + theValues);
-        //System.out.println("[types] " + theTypes);
     }
 
     /**
@@ -498,7 +489,6 @@ public abstract class AbstractQuery implements Query {
                                          dialect.useMaxForLimit() ?
                                          maxResults + firstResult : maxResults
                   );
-            //System.out.println(sql);
             //process Parameters
             appendLimitParameters();
             //appendLimitParameters(dialect);
@@ -864,7 +854,6 @@ public abstract class AbstractQuery implements Query {
     }
 
     public Query setParameter(String name, Object val, Type type) {
-        //System.out.println(type.getClass());
         if (!actualNamedParameters.contains(name)) {
             throw new IllegalArgumentException("Parameter " + name +
                                                " does not exist as a named parameter in [" +
@@ -1229,7 +1218,6 @@ public abstract class AbstractQuery implements Query {
 
         while (st.hasMoreTokens()) {
             String string = st.nextToken();
-            //System.out.println(string);
             if (string.startsWith(QueryStringHelper.QS_VARIABLE_PREFIX)) {
                 result.add(string.substring(1));
             }

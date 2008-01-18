@@ -137,8 +137,6 @@ public class DefaultSelectParser implements SelectParser {
                         c2 += StringUtils.countUnquoted(s2, '(');
                         s += "," + s2;
                     }
-                    //System.out.println("[]" + s);//找到了新的
-
                     int pos1 = s.indexOf('(');
                     int pos2 = s.lastIndexOf(')');
                     String type = s.substring(4, pos1).trim();
@@ -196,7 +194,6 @@ public class DefaultSelectParser implements SelectParser {
                 s = s.substring(0, positionOfAs)
                     + s.substring(positionOfAs + 3);
             }
-            //System.out.println(s);
             if (s.indexOf("(") != -1) {
                 return createProperty1(s);
             } else {
@@ -220,8 +217,7 @@ public class DefaultSelectParser implements SelectParser {
             } else {
                 name = null;
             }
-            //System.out.println(name + "," + string);
-            return new SimpleProperty(processName(name), string);
+             return new SimpleProperty(processName(name), string);
         }
 
         private static Property createProperty2(String s) {
@@ -230,7 +226,6 @@ public class DefaultSelectParser implements SelectParser {
             while (st.hasMoreTokens()) {
                 tokens.add(st.nextToken());
             }
-            //System.out.println(tokens);
             String string = "", name = null;
             int size = tokens.size();
             if (size < 1) {
@@ -247,7 +242,6 @@ public class DefaultSelectParser implements SelectParser {
                     string += tokens.get(i);
                 }
             }
-            //System.out.println(name + "," + string);
             return new SimpleProperty(processName(name), string);
         }
 
