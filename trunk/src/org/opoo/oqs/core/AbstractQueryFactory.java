@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opoo.oqs.CannotCreateQueryException;
 import org.opoo.oqs.CannotCreateQueryFactoryException;
 import org.opoo.oqs.Criteria;
-import org.opoo.oqs.OQSVersion;
+import org.opoo.oqs.Oqs;
 import org.opoo.oqs.QueryFactory;
 import org.opoo.oqs.dialect.Dialect;
 import org.opoo.oqs.dialect.HibernateDialectWrapper;
@@ -59,19 +59,14 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     ClassLoader beanClassLoader = null;
 
     public AbstractQueryFactory() {
-        log.info("Initialize " + OQSVersion.getImplementationTitle()
-                 + " : " + OQSVersion.getImplementationVersion());
-        System.out.println(
-                "***************************************************************");
-        System.out.println(
-                "*  Object Query System - Simple O/R Mapping & JDBC Extension");
-        System.out.println("*  Version  : " +
-                           OQSVersion.getImplementationVersion());
+        log.info("Initialize " + Oqs.getSpecificationTitle()
+                 + " : " + Oqs.getSpecificationVersion());
+        System.out.println("***************************************************************");
+        System.out.println("*  " + Oqs.getImplementationTitle() + " - " + Oqs.getDescription());
+        System.out.println("*  Version  : " + Oqs.getImplementationVersion());
         System.out.println("*  Instance : " + getClass().getName());
-        System.out.println(
-                "*  Powered by Alex Lin(http://www.opoo.org, alex@opoo.org).");
-        System.out.println(
-                "***************************************************************");
+        System.out.println("*  Copyright (c) 2006-2008 Alex Lin (alex@opoo.org).");
+        System.out.println("***************************************************************");
     }
 
     public AbstractQueryFactory(DataSource dataSource) {
