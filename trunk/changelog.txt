@@ -6,3 +6,17 @@ http://www.opoo.org
 Changes in version 0.1 (2008-01-16)
 -----------------------------------------
 
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------
+Object Query System
+Copyright 2006-2008 Alex Lin. All rights reserved.
+Project Homepage (http://oqs.googlecode.com/).
