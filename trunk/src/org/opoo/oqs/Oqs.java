@@ -25,32 +25,45 @@ package org.opoo.oqs;
  * @version 1.0
  */
 public class Oqs {
-    private static Package pkg = Oqs.class.getPackage();
+    private static final Package PKG = Oqs.class.getPackage();
+    private static final String OQS_INFO = new StringBuffer()
+		    .append("***************************************************************")
+		    .append("\n*  ").append(Oqs.getImplementationTitle()).append(" - ").append(Oqs.getDescription())
+		    .append("\n*  Version : ").append(Oqs.getImplementationVersion())
+		    .append("\n*  License : Apache License Version 2.0")
+		    .append("\n*  Copyright 2006-2008 Alex Lin. All rights reserved.")
+		    .append("\n***************************************************************")
+		    .toString();
+
     public static String getImplementationVendor() {
-        return (pkg != null ? pkg.getImplementationVendor() : null);
+        return (PKG != null ? PKG.getImplementationVendor() : null);
     }
 
     public static String getImplementationTitle() {
-        return (pkg != null ? pkg.getImplementationTitle() : null);
+        return (PKG != null ? PKG.getImplementationTitle() : null);
     }
 
     public static String getImplementationVersion() {
-        return (pkg != null ? pkg.getImplementationVersion() : null);
+        return (PKG != null ? PKG.getImplementationVersion() : null);
     }
 
     public static String getSpecificationVersion() {
-        return (pkg != null ? pkg.getSpecificationVersion() : null);
+        return (PKG != null ? PKG.getSpecificationVersion() : null);
     }
 
     public static String getSpecificationVendor() {
-        return (pkg != null ? pkg.getSpecificationVendor() : null);
+        return (PKG != null ? PKG.getSpecificationVendor() : null);
     }
 
     public static String getSpecificationTitle() {
-        return (pkg != null ? pkg.getSpecificationTitle() : null);
+        return (PKG != null ? PKG.getSpecificationTitle() : null);
     }
 
     public static String getDescription() {
 	return "Simple O/R Mapping & JDBC Extensions";
+    }
+
+    public static String getOqsInfo() {
+        return OQS_INFO;
     }
 }
