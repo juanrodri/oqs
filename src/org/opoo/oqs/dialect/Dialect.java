@@ -97,6 +97,12 @@ public interface Dialect {
     String getIdentitySelectString(String table, String column, int type);
 
     /**
+     *
+     * @return String
+     */
+    String getIdentitySelectString();
+
+    /**
      * 返回各类数据库生成GUID的SQL。如果数据库不支持GUID，则抛出
      * UnsupportOperationException.
      * @return String

@@ -14,6 +14,7 @@ import org.opoo.oqs.jdbc.ConnectionManager;
 import org.opoo.oqs.jdbc.JdbcUtils;
 import org.opoo.oqs.jdbc.ResultSetHandler;
 import org.opoo.oqs.type.Type;
+import org.opoo.oqs.type.TypeFactory;
 
 public class QueryImpl extends AbstractQuery {
 
@@ -137,6 +138,27 @@ public class QueryImpl extends AbstractQuery {
             JdbcUtils.close(st);
             cm.releaseConnection(conn);
         }
+    }
+
+    protected Object queryForObject(String sql, Class clazz) {
+        Connection conn = cm.getConnection();
+        PreparedStatement st = null;
+	ResultSet rs = null;
+        try {
+            st = conn.prepareStatement(sql);
+	    rs = st.executeQuery();
+	    if(rs.next())
+	    {
+		return TypeFactory.guessType(clazz).safeGet(rs, 1);
+	    }
+        } catch (SQLException ex) {
+            throw new QueryException(ex);
+        } finally {
+	    JdbcUtils.close(rs);
+            JdbcUtils.close(st);
+            cm.releaseConnection(conn);
+        }
+	return null;
     }
 
     interface CallableStatementCallback {

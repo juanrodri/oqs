@@ -32,20 +32,40 @@ import org.opoo.util.Assert;
  * @author Alex Lin(alex@opoo.org)
  * @version 1.1
  */
-public final class AsteriskPropertyMapper extends SinglePropertyMapper implements
-        PropertyMapper {
+public final class AsteriskPropertyMapper extends SinglePropertyMapper
+	implements PropertyMapper {
     private static final Log log = LogFactory.getLog(AsteriskPropertyMapper.class);
     private final AsteriskProperty ap;
     private PropertyMapper[] singlePropertyMappers;
+    private int columnCount = 0;
+    private int extraCount = 0;
     public AsteriskPropertyMapper(AsteriskProperty ap) {
         super(ap.getName(), ap.getString(), ap.getStartIndex());
         this.ap = ap;
+	columnCount = ap.getColumnCount();
     }
 
     public void initialize(ResultSetMetaData rsmd) throws SQLException {
         log.debug(getClass().getName() + ".initialize() is called.");
-        super.initialize(rsmd);
+	super.initialize(rsmd);
+
+	if (columnCount == 0) {
+	    Assert.notNull(rsmd, "ResultSetMeta is required in uncounted asterisk query.");
+	    columnCount = rsmd.getColumnCount() -
+			  ap.getCountAfterCurrentAsterisk()
+			  - getIndex() + 1;
+	    extraCount = columnCount - 1;
+        }
         singlePropertyMappers = createSinglePropertyMappers();
+    }
+
+    /**
+     * 必须在调用initialize()之后才能调用此函数。
+     * 只有在startrindex > 0,columnCount==0的情况下，才返回非有效的offset。
+     * @return int
+     */
+    protected int getExtraCount(){
+	return extraCount;
     }
 
     public Object map(ResultSet rs, int rowNum) throws SQLException {
@@ -75,6 +95,19 @@ public final class AsteriskPropertyMapper extends SinglePropertyMapper implement
     }
 
     private PropertyMapper[] createSinglePropertyMappers() throws SQLException {
+        log.debug("解析" + getMapperString() + ",解析后字段数：" + columnCount);
+        PropertyMapper[] mappers = new SinglePropertyMapper[columnCount];
+        for (int index = getIndex(), i = 0; i < columnCount; i++, index++) {
+            String name = rsmd.getColumnName(index);
+            SinglePropertyMapper mapper = new SinglePropertyMapper(name, name,
+                    index);
+            mapper.initialize(rsmd);
+            mappers[i] = mapper;
+        }
+        return mappers;
+    }
+
+    private PropertyMapper[] createSinglePropertyMappers2() throws SQLException {
         int startIndex = getIndex();
         int columnCount = ap.getColumnCount();
 
@@ -85,6 +118,8 @@ public final class AsteriskPropertyMapper extends SinglePropertyMapper implement
                           ap.getCountAfterCurrentAsterisk()
                           - startIndex + 1;
         }
+
+
         //int startIndex = getIndex();
         //int endIndex = rsmd.getColumnCount() - ap.getAfterAsterisk();
         //PropertyMapper[] mappers = new SinglePropertyMapper[endIndex - startIndex + 1];

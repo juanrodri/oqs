@@ -73,7 +73,7 @@ public abstract class AbstractDialect implements Dialect {
         return false;
     }
 
-    protected String getIdentitySelectString() {
+    public String getIdentitySelectString() {
         throw new UnsupportedOperationException(
                 "Dialect does not support identity key generation");
     }

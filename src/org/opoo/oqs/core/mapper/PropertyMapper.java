@@ -31,4 +31,10 @@ public interface PropertyMapper extends Mapper, Property {
     String getMapperString();
 
     Class getReturnType();
+
+    /**
+     * 当前面有*的属性时，此处设置其偏移量。
+     * @param offset OffsetCounter
+     */
+    void setOffset(Offset offset);
 }

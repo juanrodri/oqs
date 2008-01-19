@@ -26,11 +26,17 @@ import org.opoo.util.ClassUtils;
  */
 public class BeanClassLoader extends ClassUtils.PackageClassLoader {
     public BeanClassLoader() {
-        super((String[])null);
+	super();
     }
 
     public BeanClassLoader(String imp) {
-        super(imp);
+        String[] imps = null;
+        if (imp.indexOf(",") != -1) {
+            imps = imp.split(",");
+        } else {
+            imps = new String[] {imp};
+        }
+        setImports(imps);
     }
 
     public BeanClassLoader(String[] imports) {

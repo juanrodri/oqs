@@ -80,6 +80,13 @@ public class DefaultSelectParser implements SelectParser {
             }
 
             public int next(int count) {
+		if(ap != null){
+		    ap.pulsCountAfterCurrentAsterisk(count);
+		}
+		i += delta;
+		delta = count;
+		return i;
+    /*
                 if (ap == null) {
                     i += delta;
                     delta = count;
@@ -87,7 +94,7 @@ public class DefaultSelectParser implements SelectParser {
                 } else {
                     ap.pulsCountAfterCurrentAsterisk(count);
                     return -1;
-                }
+                }*/
             }
 
             public int current() {
@@ -107,8 +114,7 @@ public class DefaultSelectParser implements SelectParser {
         public static PropertyMapper parsePropertyMapper(String qs,
                 ClassLoader beanClassLoader) {
             Index index = new Index();
-            PropertyMapper[] prms = parsePropertyMappers(qs, index,
-                    beanClassLoader);
+            PropertyMapper[] prms = parsePropertyMappers(qs, index, beanClassLoader);
             if (prms.length == 1) {
                 return prms[0];
             } else if (prms.length > 1) {
@@ -150,7 +156,7 @@ public class DefaultSelectParser implements SelectParser {
                             index, beanClassLoader);
                     Property sp = parseProperty(ps);
                     //PropertyMapper m = new ListQueryRowMapper(sp, mappers);
-                    PropertyMapper m = createComplextPropertyMapper(sp, mappers,
+                    PropertyMapper m = createComplexPropertyMapper(sp, mappers,
                             type, beanClassLoader);
                     list.add(m);
                 }
@@ -178,8 +184,7 @@ public class DefaultSelectParser implements SelectParser {
                 int cnt = Integer.parseInt(scnt);
                 sstr = (sstr == null) ? "*" : sstr + "*";
 
-                AsteriskProperty ap = new AsteriskProperty(sstr, index.next(cnt),
-                        cnt);
+                AsteriskProperty ap = new AsteriskProperty(sstr, index.next(cnt), cnt);
                 return new AsteriskPropertyMapper(ap);
             } else {
                 Property sp = parseProperty(s);
@@ -252,7 +257,7 @@ public class DefaultSelectParser implements SelectParser {
             return null;
         }
 
-        private static PropertyMapper createComplextPropertyMapper(Property sp,
+        private static PropertyMapper createComplexPropertyMapper(Property sp,
                 PropertyMapper[] mappers,
                 String type, ClassLoader beanClassLoader) {
             String t = type.toLowerCase();
