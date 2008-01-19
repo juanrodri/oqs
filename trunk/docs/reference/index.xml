@@ -1,0 +1,1247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<book>
+  <bookinfo>
+    <title>OQS- Java Simple O/R Mapping &amp; JDBC Extensions</title>
+
+    <subtitle>oqs - 1.0开发参考手册</subtitle>
+
+    <author>
+      <firstname>Alex</firstname>
+
+      <surname>Lin</surname>
+
+      <affiliation>
+        <address>Web : <otheraddr><ulink url="http://www.opoo.org">www.opoo.org</ulink></otheraddr>
+Email : <email>alex@opoo.org</email></address>
+      </affiliation>
+    </author>
+
+    <releaseinfo>Version 1.0-dev</releaseinfo>
+
+    <legalnotice>
+      <para>Copies of this document may be made for your own use and for
+      distribution to others, provided that you do not charge any fee for such
+      copies and further provided that each copy contains this Copyright
+      Notice, whether distributed in print or electronically.</para>
+    </legalnotice>
+
+    <legalnotice>
+      <para>此文档属于OQS发行包的一部分。您可以自由链接、下载、传播此文档，或者放置在您的网站上，甚至作为产品的一部分发行。但前提是必须保证全文完整转载，包括完整的版权信息和作者声明。这里“完整”的含义是，不能进行任何删除/增添/注解。若有删除/增添/注解，必须逐段明确声明那些部分并非本文档的一部分。</para>
+    </legalnotice>
+
+    <pubdate>(Review)</pubdate>
+
+    <copyright>
+      <year>2006-2008 Alex Lin. All rights reserved.</year>
+    </copyright>
+  </bookinfo>
+
+  <preface>
+    <title>Overview</title>
+
+    <para>Object Query System(OQS) is a simple object/relational persistence
+    and query service. OQS lets you develop persistent classes using simple
+    query string (Object Query String, QS). Just like native SQL, object query
+    string is very powerful, it's easy to understand. ,</para>
+
+    <para>在JDBC扩展方面，OQS提供一面向对象的数据库查询对象，封装了大部分数据库操作细节，支持条件查询、批量更新、事务管理等。</para>
+
+    <para>在O/R
+    Mapping方面，OQS不同于HIBERNATE等工具，不需要写复杂的O/R映射配置文件，也不一定要编写对应的实体类（POJO、持久对象），通过在查询语句中指定查询结果要映射的类（<emphasis
+    role="bold">甚至接口</emphasis>），就可以完成ORM功能。</para>
+  </preface>
+
+  <chapter>
+    <title>名词解释</title>
+
+    <section>
+      <title>查询语句(Query String)</title>
+
+      <para>OQS 使用查询语句（Query
+      String）来查询数据库，并根据查询语句的描述来进行O/R映射。QS描述了数据库中的一条记录将映射成怎样的一个JAVA对象。通过QS查询的结果都是对象，primitive的值将会自动使用其包装类，JDK1.5以上则可以使用泛型，省去类型转化的麻烦。</para>
+
+      <para>QS类似于NATIVE
+      SQL，是与数据库平台相关的，但分页查询是与数据库产品无关的；如果使用标准的SQL语句，也能获得较好的数据库移植性。应尽量使用标准的SQL语法，避免使用数据库相关的特殊函数操作，就可以减少或去除更换数据库产品所带来的代码移植问题。</para>
+
+      <section>
+        <title>QS语法特点</title>
+
+        <orderedlist>
+          <listitem>
+            <para>描述了一条数据库的记录将要映射成的JAVA对象的数据类型。</para>
+          </listitem>
+
+          <listitem>
+            <para>QS语法上类似于HIBERNATE的HQL，便于有HQL知识的开发人员快速上手。</para>
+          </listitem>
+
+          <listitem>
+            <para>所有NATIVE SQL都是一个合法的QS，QS是NATIVE SQL的一个超集，但比NATIVE
+            SQL更加灵活，功能更强大。</para>
+          </listitem>
+
+          <listitem>
+            <para>除了别名、Java类与属性的名称外，查询语句对大小写并不敏感。 所以 SeLeCT 与 sELEct 以及 SELECT
+            是相同的，但是 org.opoo.samples.FOO 并不等价于
+            org.opoo.samples.Foo。本手册中的QS关键字将使用小写字母。</para>
+          </listitem>
+        </orderedlist>
+      </section>
+
+      <section>
+        <title>Query String示例</title>
+
+        <section>
+          <title>Native SQL for OQS</title>
+
+          <para><programlisting>select id, name, description from UserInfo where id &gt; ?</programlisting><literal>以上QS未指定映射器（Mapper），OQS会调用默认映射器（ArrayPropertyMapper），查询结果集的每条记录将映射成一个Object数组（Object[]），其中[0]是字段id的值，[1]是字段name的值，[2]是字段description的值。</literal></para>
+
+          <tip>
+            <para>当QS中只有一个属性时（一个字段），查询结果不是数组，而是此字段的值。</para>
+          </tip>
+        </section>
+
+        <section>
+          <title>QS关键字new</title>
+
+          <para><programlisting>select new list(id, name, description) from UserInfo where id &gt; ?</programlisting><literal>以上QS指定使用ListPropertyMapper，查询结果集的每条记录将映射成一个java.util.List类型的对象，List中按QS属性描述顺序依次存放字段id的值、字段name的值、字段description的值。</literal></para>
+
+          <para><programlisting>select new map(id, name as name, description mydesc) from UserInfo where id &gt; ?</programlisting><literal>以上QS指定使用MapPropertyMapper，查询结果集的每条记录将映射成一个java.util.Map类型的对象，Map中数据存储格式{id=字段id的值,
+          name=字段name的值,
+          mydesc=字段description的值}。此时使用字段的别名作为Map的key，字段的值作为Map的value，没有设置别名时使用字段名称作为Map的key。设置别名可以使用“AS”，“AS”可以省略，同SQL语法。</literal></para>
+
+          <para><programlisting>select new org.opoo.oqs.sapmles.UserInfo(id, name as userName, description userDesc) 
+from userinfo where id &gt; ?</programlisting><literal>以上QS指定使用BeanPropertyMapper，查询结果每条记录将映射成一个org.opoo.oqs.sapmles.UserInfo类型的对象，UserInfo类应该有id、userName、userDesc等属性的setter/getter，字段的别名描述了对应的JAVA对象中的属性名称，所以大小写是敏感的，如果没有设置别名则使用字段的名称作为属性的名称，类名称也是大小写敏感的。设置别名可以使用“AS”，“AS”可以省略，同SQL语法。此JAVA类必须是public的，而且必须有一个公共的无参数的构造器。</literal></para>
+
+          <para><literal>OQS支持将关系型数据映射到接口。因此UserInfo可以是一个接口，而不需要任何实现类，UserInfo接口中要有相应属性的setter/getter，但并不严格要求setter/getter配对，也不要QS中指定的所有的属性在接口中都有相应的setter/getter。</literal></para>
+
+          <para><literal>QS中也可以省略类名的前缀，此时必须设置BeanClassLoader，在BeanClassLoader指定要映射的类所在的包。以上QS在使用BeanClassLoader时可以改写为“select
+          new UserInfo(...”的形式，要使用“new
+          BeanClassLoader("org.opoo.oqs.samples.UserInfo")”或者“new
+          BeanClassLoader("org.opoo.oqs.samples.*")”的语法来创建BeanClassLoader。BeanClassLoader构造函数接受String数组作为参数，指定多个映射类的位置。</literal></para>
+        </section>
+
+        <section>
+          <title>QS子句别名</title>
+
+          <para>QS的子句可以使用关键字"AS"来定义别名，如同SQL语法一样，关键字"AS"可省略。</para>
+
+          <programlisting>select new list(id, name, description) as mylist from UserInfo where id &gt; ?</programlisting>
+
+          <tip>
+            <para>在查询复杂结果时最好给每个QS子句加上别名，以方便复杂数据类型的处理。</para>
+          </tip>
+        </section>
+
+        <section>
+          <title>多个QS子句</title>
+
+          <para><programlisting>select id, new list(name, description) as list0, new map(id, name as userName) map0 from userinfo</programlisting><literal>此QS表示查询结果集的每条记录将映射成一个数组（Object[]），其中[0]是字段id的值，[1]是java.util.List类型数据，list中依次存储了字段name、description的值，[2]是java.util.Map类型的数据，{id=字段id的值,
+          userName=字段name的值}。</literal></para>
+        </section>
+
+        <section>
+          <title>QS嵌套语法</title>
+
+          <para><programlisting>select new list(id, name, new map(id as ID, name NAME, description DESC) as myMap) from UserInfo</programlisting><literal>此QS表示查询结果集的每条记录将映射成一个java.util.List类型的对象，依次存储字段id、name的值和一个java.util.Map类型的数据，map存储数据结构是{ID=字段id的值,
+          NAME=字段name的值, DESC=字段description的值}。</literal></para>
+
+          <para><emphasis>QS可以处理无限层次嵌套，嵌套同样适用于非集合类映射结果，只要数据类型是符合的。更多信息请阅读第4章：Object
+          Query。</emphasis></para>
+        </section>
+
+        <section>
+          <title>带星号的QS</title>
+
+          <para><programlisting>select new list(*) from UserInfo</programlisting>此QS表示查询结果集的每条记录将映射成一个java.util.List类型的对象，依次存储表中所有字段的值。</para>
+
+          <programlisting>select new map(*) from UserInfo</programlisting>
+
+          <programlisting>select new UserInfo(*) from UserInfo</programlisting>
+
+          <para>带"*"的查询也可以嵌套，如下<programlisting>select new list(id, *) from UserInfo
+select new map(id as id, new list(*) as list) from UserInfo</programlisting></para>
+
+          <para>但一个QS中出现多于一个“*”时，如N个，如果没有设置MAPPER，则必须至少对其中N-1个指定此“*”代表了多少个字段。在“*”后紧跟括号，括号内的数字可指定字段数。如下：<programlisting>select new list(a.*), new map(b.*(8)) from UserInfo a, UserDetail b
+select a.*(3), b.*(8) from UserInfo a, UserDetail b</programlisting></para>
+        </section>
+      </section>
+    </section>
+
+    <section>
+      <title>QS属性</title>
+
+      <para>查询语句(QS)中select ...
+      from之间表示的每个字段都是一个QS属性，几个简单的QS属性也可以组合成一个复杂的QS属性，如 new map(id, name) as
+      map0， 此属性的别名是map0，类型是一个复合属性。</para>
+    </section>
+
+    <section>
+      <title>映射器(Mapper)</title>
+
+      <para>如1.2.1所示，当QS中没有指定任何映射器是，系统会调用默认的Mapper，但此默认行为也可以通过指定自定义的Mapper来改变。设置自定义Mapper后，OQS将使用指定的Mapper来处理结果集。设置Mapper的方法如下。</para>
+
+      <para><programlisting>Mapper mapper = ...;
+QueryFactory queryFactory = ...;
+List list = queryFactory.createQuery("select * from UserInfo").setMapper(mapper).list();
+</programlisting>其中Mapper的定义如下：<programlisting>public interface Mapper {
+    void initialize(ResultSetMetaData rsmd) throws SQLException;
+    Object map(ResultSet rs, int rowNum) throws SQLException;
+}
+</programlisting>initialize方法做在查询结果集初始化的时候被调用，map方法则在负责将结果集每条记录转化成一个java对象，自定义Mapper时，实现map方法即可，可以通过继承MapperAdaptor来实现。<programlisting>Mapper mapper = new MapperAdaptor()
+{
+    public Object map(ResultSet rs, int rowNum) throws SQLException
+    {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(rs.getLong("id"));
+        userInfo.setName(rs.getString("name"));
+        return userInfo;
+    }
+}
+...</programlisting><note>
+          <para>如果既设置了自定义的Mapper，又在QS中指定了映射类型，那么OQS将会采用自定义的Mapper。</para>
+        </note></para>
+    </section>
+
+    <section>
+      <title>占位参数(Positional Parameters)和命名参数(Named Parameters)</title>
+
+      <para>占位参数(Positional Parameters)和命名参数(Named
+      Parameters)都可以应用于QS中。</para>
+
+      <section>
+        <title>占位参数(Positional Parameters)</title>
+
+        <para><programlisting>select id, name from userinfo where id &gt; ?</programlisting>上述QS中“?”就代表一个占位参数(Positional
+        Parameter)，占位参数记录了参数的位置（索引）和参数的值。</para>
+      </section>
+
+      <section>
+        <title>命名参数(Named Parameters)</title>
+
+        <para><programlisting>select id, name from userinfo where id in (:ids) and name=:name</programlisting>上面的QS中以“:”开头的字符串代表一个命名参数(Named
+        Parameter)，命名参数记录了参数的名字和参数的值。示例中的QS包含两个Named
+        parameters，参数的名字分别是ids和name。</para>
+      </section>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>OQS快速上手</title>
+
+    <section>
+      <title>配置OQS运行环境</title>
+
+      <para>OQS 的编译和运行需要JDK1.4.2以上版本。</para>
+
+      <para>OQS distributions包括源码包和二进制包。发布包中都包含了编译或者运行所需要的类库。</para>
+
+      <table>
+        <title>OQS依赖的第三方类库</title>
+
+        <tgroup cols="2">
+          <thead>
+            <row>
+              <entry align="center">类库</entry>
+
+              <entry align="center">描述</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>Apache Commons(commons-lang 2.3, commons-logging 1.0,
+              commons-beanutils 1.6, commons-collections 3.2)(必需)</entry>
+
+              <entry>OQS使用Apache Jakarta Commons项目提供的多个工具类库。</entry>
+            </row>
+
+            <row>
+              <entry>Spring core, jdbc, beans and dao Modules (SpringFramework
+              2.0 or later)(必需)</entry>
+
+              <entry>OQS使用Spring Framework中的多个modules。</entry>
+            </row>
+
+            <row>
+              <entry>JTA(必需)</entry>
+
+              <entry>javax.transaction相关类库。</entry>
+            </row>
+
+            <row>
+              <entry>Hibernate 3.0(编译必需、运行可选)</entry>
+
+              <entry>当Querist使用Spring Framework
+              jdbc作为底层JDBC操作时，QueryFactory要选用com.lcql.framework.querist.impl.SpringJdbcQueryFactoryImpl，此时需要Spring
+              Framework jdbc，core等相关类库。</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para>除了上表列出的类库，运行环境还需要相应数据库的JDBC驱动类库等。</para>
+    </section>
+
+    <section>
+      <title>创建QueryFactory</title>
+
+      <para>QueryFactory是OQS最重要的两个接口之一，另外一个是Query。QueryFactory的主要作用是根据需要产生不同的Query实例。</para>
+
+      <para>QueryFactory目前只用一个使用spring
+      jdbc的实现-org.opoo.oqs.spring.SpringQueryFactoryImpl，开发者可以继承AbstractQueryFactory类来实现了自己的QueryFactory。</para>
+
+      <para>创建QueryFactory需要指定一个数据源(java.sql.DataSource)，分页查询还必须设置数据库Dialect(Dialect可以使用现有的各个实现版本，也可以直接使用Hibernate3的Dialect实现)。如果创建过程出现错误，则抛出CannotCreateQueryFactoryException异常，这是checked
+      exception，必须处理。</para>
+
+      <para><emphasis>建议：在一个应用中，尽量保证只有一个QueryFactory的实例（单态），这样可以减少资源的使用情况。</emphasis></para>
+
+      <para>下面讲述两种最常见的QueryFactory创建方式，更详细实现请参考后面的章节。</para>
+
+      <section>
+        <title>在应用程序中直接创建QueryFactory实例</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>使用默认的QueryFactory实现类：</para>
+
+            <programlisting>DataSource dataSource = ...;
+QueryFactory factory = new SpringQueryFactoryImpl(dataSource);</programlisting>
+          </listitem>
+
+          <listitem>
+            <para>指定QueryFactory的实现类，并指定参数：</para>
+
+            <programlisting>String factoryClass = "org.opoo.oqs.spring.SpringQueryFactoryImpl";
+DataSource dataSource = ...;
+String dialectClass = "org.opoo.oqs.dialect.MySQLDialect";
+Integer showSql = new Integer(2);//<co id="co.1.1" />SQL 调试信息显示级别
+
+Map map = new HashMap();
+map.put("dataSource", dataSource);
+map.put("dialectClass", dialectClass);
+map.put("showSql", showSql);
+map.put("beanClassLoader", new BeanClassLoader("org.opoo.oqs.samples.*"));//<co
+                id="co.1.2" />
+
+QueryFactory factory = AbstractQueryFactory.createQueryFactory(factoryClass, map);</programlisting>
+
+            <calloutlist>
+              <callout arearefs="co.1.1">
+                <para>SQL调试信息显示级别，0不显示，1只显示SQL，&gt;=2显示SQL和中间转换过程中产生的中间QS。</para>
+              </callout>
+
+              <callout arearefs="co.1.2">
+                <para>设置BeanClassLoader。</para>
+              </callout>
+            </calloutlist>
+          </listitem>
+        </itemizedlist>
+      </section>
+
+      <section>
+        <title>通过Spring框架的ApplicationContext来创建QueryFactory实例</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>配置文件（例如：applicationContext.xml）</para>
+
+            <programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"&gt;
+  ...
+&lt;/bean&gt;
+
+&lt;bean id="queryFactory" class="org.opoo.oqs.spring.SpringQueryFactoryImpl"&gt;
+  &lt;property name="dataSource"&gt;&lt;ref local="dataSource"/&gt;&lt;/property&gt;
+  &lt;property name="showSql"&gt;&lt;value&gt;2&lt;/value&gt;&lt;/property&gt;<co
+                id="co.2.1" />
+  &lt;property name="dialectClassName"&gt;
+    &lt;value&gt;org.opoo.oqs.dialect.MySQLDialect&lt;/value&gt;<co
+                id="co.2.2" />
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+            <calloutlist>
+              <callout arearefs="co.2.1">
+                <para>SQL调试信息显示级别，0不显示，1只显示SQL，&gt;=2显示SQL和中间转换过程中产生的中间QS。</para>
+              </callout>
+
+              <callout arearefs="co.2.2">
+                <para>此处可以直接使用Hibernate3的dialect，如：&lt;value&gt;org.hibernate.dialect.MySQLDialect&lt;/value&gt;</para>
+              </callout>
+            </calloutlist>
+          </listitem>
+
+          <listitem>
+            <para>Java程序</para>
+
+            <para><programlisting>ApplicationContext ac = new FileSystemXmlApplicationContext("applicationContext.xml");
+QueryFactory factory = (QueryFactory) ac.getBean("queryFactory");</programlisting></para>
+          </listitem>
+        </itemizedlist>
+      </section>
+    </section>
+
+    <section>
+      <title>创建Query</title>
+
+      <para>Query是OQS另外一个最要的接口。从QueryFactory创建一个查询示例如下：</para>
+
+      <para><programlisting>Query query = factory.createQuery("select new list(id, name) from userinfo"); </programlisting>有关Query更详细的信息请阅读第3章：QueryFactory和Query。</para>
+    </section>
+
+    <section>
+      <title>使用QS进行查询</title>
+
+      <para>对Query的操作类似于Hibernate的Query。</para>
+
+      <para><programlisting>//查询
+Query query = factory.createQuery("select new list(id, name) from userinfo"); 
+List list = query.list();
+//或者：
+QueryIterator iterator = query.iterate();
+
+//更新
+int effectRows = factory.createQuery("update userinfo set name='aa' where id=1").executeUpdate();</programlisting></para>
+    </section>
+
+    <section>
+      <title>使用带参数的QS进行查询</title>
+
+      <para><programlisting>//Positional parameters
+Query query = factory.createQuery("select new list(id, name) from userinfo where id &gt; ?"); 
+query.setInteger(0, 1);//index从0开始
+List list = query.list();
+
+list = factory.createQuery("select id, name from userinfo where id &gt; ? and name=?")
+.setInteger(0, 1)//也可以先setString(1, "");
+.setString(1, "name1")
+.list();
+
+//update
+int result = factory.createQuery("update userinfo set name=? where id=?")
+.setString(0, "new name")
+.setInteger(1, 23)
+.executeUpdate();
+
+
+//named parameters
+list = factory.createQuery("select id, name from userinfo where id &gt; :id")
+.setInteger("id", 10)
+.list();
+
+//positional parameters &amp; named parameters
+list = factory.createQuery("select id, name from userinfo where id &gt; ? and name=:name")
+.setInteger(0, 10)
+.setString("name", "name1")
+.list();</programlisting></para>
+    </section>
+
+    <section>
+      <title>一个完整的示例</title>
+
+      <para>示例使用dbcp数据源，需要commons-dbcp和commons-pool类库。要运行本示例，您还必须有相应的数据库（test）、数据表（test_table）、以及JDBC驱动包等。本示例使用SQLServer数据库，JTDS驱动。</para>
+
+      <programlisting>package org.opoo.oqs.samples;
+
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.opoo.oqs.*;
+import org.opoo.oqs.core.*;
+import org.opoo.oqs.spring.*;
+
+/**
+ * @author alex@opoo.org
+ */
+public class TestQuery
+{
+  public static void main(String[] args) throws
+      CannotCreateQueryFactoryException
+  {
+    BasicDataSource ds = new BasicDataSource();
+    ds.setDefaultAutoCommit(true);
+    ds.setDriverClassName("net.sourceforge.jtds.jdbc.Driver");
+    ds.setMaxActive(10);
+    ds.setMaxIdle(2);
+    ds.setUsername("sa");
+    ds.setPassword("");
+    ds.setUrl("jdbc:jtds:sqlserver://127.0.0.1:1433;DatabaseName=test");
+
+    SpringQueryFactoryImpl factory = new SpringQueryFactoryImpl(ds);
+    factory.setShowSql(3);
+
+    List list = factory.createQuery("select new map(id id, name nm, desc1 dc) from test_table where id &gt; ?")
+      .setInteger(0, 2).list();
+
+    for(int i = 0, n = list.size() ; i &lt; n; i++)
+    {
+      Map map = (Map) list.get(i);
+      System.out.println("ID: " + map.get("id"));
+      System.out.println("Name: " + map.get("nm"));
+      System.out.println("Desc: " + map.get("dc"));
+      System.out.println("-------------------");
+    }
+  }
+}</programlisting>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>QueryFactory和Query</title>
+
+    <para>QueryFactory和Query都采用了基于接口的设计，开发者可以轻松的扩展OQS的功能。</para>
+
+    <section>
+      <title>QueryFactory</title>
+
+      <para>目前版本OQS有一种QueryFactory的实现。</para>
+
+      <para>org.opoo.oqs.spring.SpringQueryFactoryImpl
+      调用createQuery()可以创建一个org.opoo.oqs.spring.SpringQueryImpl的实例。</para>
+
+      <para>这个类继承自org.opoo.oqs.core.AbstractQueryFactory，AbstractQueryFactory定义了setDataSource(),
+      setDialectClassName(), setConnectionManager()，setShowSql()等方法。<emphasis
+      role="bold">要创建一个有效的QueryFactory，QueryFactory实现类、数据源（或者ConnectionManager)这两个重要的属性必须被指定。</emphasis>
+      showSql属性指定sql调试信息的显示级别，0不显示，1只显示SQL，&gt;=2显示SQL和中间转换过程中产生的中间QS。方法的具体描述请参考API文档。</para>
+
+      <para>创建对象是dataSource和connectionManager属性二者选其一即可，指定了dataSource可以就不必设置connectionManager，而指定了connectionManager也不必再设置dataSource。</para>
+
+      <para>ConnectionManager是org.opoo.oqs.jdbc包中的一个接口，声明了获得数据库连接（getConnection()）和释放数据库连接（releaseConnection(java.sql.Connection
+      conn)）的两个基本方法，用来管理数据库连接，您可以定制自己的ConnectionManager。</para>
+
+      <programlisting>DataSource dataSource = ...;
+QueryFactory qf = new SpringQueryFactoryImpl();//QueryFactory实现类
+qf.setDataSource(dataSource);//数据源
+
+或者 QueryFactory qf = new SpringQueryFactoryImpl(dataSource);</programlisting>
+
+      <para>上例创建QueryFactory过程中将自动创建系统默认的ConnectionManager，用户不必再指定。</para>
+
+      <programlisting>DataSource dataSource = ...;
+//简单的实现
+ConnectionManager manager = new ConnectionManager()
+{
+  public Connection getConnection() throws DataAccessException
+  {
+    try
+    {
+      return dataSource.getConnection();
+    }
+    catch(Exception e)
+    {
+      throw new DataAccessException(e);
+    }
+  }
+
+  public void releaseConnection(Connection conn)
+  {
+    if(conn != null)
+      try
+      {
+        conn.close();
+      }
+      catch(Exception e)
+      {
+      }
+  }
+};
+
+QueryFactory qf = new SpringQueryFactoryImpl();//QueryFactory实现类
+qf.setConnectionManager(manager);//数据连接管理器</programlisting>
+
+      <para>上例中指定了QueryFactory的ConnectionManager，因此不必再指定DataSource。</para>
+
+      <para>AbstractQueryFactory定义了一个static方法来创建QueryFactory实例。</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>createQueryFactory(String factoryClassName, Map properties) -
+          此方法指定了QueryFactory实现类的名称，和创建这个QueryFactory的实例时需要设置的属性。属性保存在一个java.util.Map中，map的key就是属性名，value就是属性要设置的值，由反射机制调用相应的set方法。</para>
+
+          <programlisting>String factoryClass = "org.opoo.oqs.spring.SpringQueryFactoryImpl"
+DataSource dataSource = ...;
+String dialectClass = "org.opoo.oqs.dialect.MySQLDialect";
+Integer showSql = new Integer(2);//SQL 调试信息显示级别
+
+Map map = new HashMap();
+map.put("dataSource", dataSource);
+map.put("dialectClass", dialectClass);
+map.put("showSql", showSql);
+
+QueryFactory factory = AbstractQueryFactory.createQueryFactory(factoryClass, map);</programlisting>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Query</title>
+
+      <para>Query是一个面向对象的查询接口。Query的实例必须通过调用QueryFactory的createQuery方法来创建。例如：</para>
+
+      <programlisting>QueryFactory qf = ...;
+Query query = qf.<emphasis>createQuery</emphasis>("select count(*) from tabs");</programlisting>
+
+      <para>Query的具体类型只与QueryFactory的类型有关。</para>
+
+      <para>Query主要包括一组set方法，用来设置查询所需的参数，同名重载的方法一般分别是绑定命名参数和占位参数的。
+      最基本的设置参数方法是：setParameter(String name, Object value, Type
+      dataType)和setParameter(int index, Object value, Type
+      dataType)，例如：</para>
+
+      <programlisting>query.setParameter(0, value, DataTypes.INTEGER);</programlisting>
+
+      <para>以上操作用来绑定一个Integer型的占位参数。等同于调用setInteger(0,
+      ((Integer)value).intValue());</para>
+
+      <programlisting>query.setParameter("name1", value, DataTypes.INTEGER);</programlisting>
+
+      <para>以上操作用来绑定一个Integer型的命名参数。等同于调用setInteger("name1",
+      ((Integer)value).intValue());</para>
+
+      <programlisting>query.setParameterList("names", new String[]{"a","b","c"});</programlisting>
+
+      <para>以上操作用来绑定一个值是数组的命名参数。功能于setParameterList(String,
+      Collection)相同，一般数组或集合中的元素类型都是一致的，所以也可以调用setParameterList(String,
+      Object[], Type)或者setParameterList(String, Collection,
+      Type)，明确指出个元素的类型。</para>
+
+      <para></para>
+
+      <para></para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Object Query</title>
+
+    <abstract>
+      <para>本章以示例代码来讲解Object
+      Query的具体使用，详细代码请参考发行包samples目录。示例默认采用HSQLDB数据库，运行sample/db/server.sh(Linux)或者samples\db\server.bat(Windows)即可启动数据库服务。</para>
+
+      <para>运行示例需要JDK1.5以上版本。</para>
+    </abstract>
+
+    <section>
+      <title>准备工作</title>
+
+      <para>准备数据：samples中包含建表脚本（HSQLDB和MySQL两种版本），使用HSQLDB不必再创建数据库和表，不必初始化数据，如果使用MYSQL则需要手动创建库、表，并执行oqs-mysql-dataload初始化数据。</para>
+
+      <para>建表的HSQLDB脚本如下（userinfo2 为主键自增的表）：</para>
+
+      <programlisting>create table userinfo (
+id            bigint not null,
+name          varchar(30) not null ,
+age           int not null ,
+regtime       datetime,
+primary key (id) 
+);
+
+create table userinfo2 (
+id            bigint generated by default as identity(start with 0,increment by 1) primary key,
+name          varchar(30) not null ,
+age           int not null ,
+regtime       datetime,
+primary key (id) 
+);
+</programlisting>
+
+      <para>编写java接口及类，分别用于测试映射到接口和类。</para>
+
+      <programlisting>public interface UserInfo extends Serializable {
+    Long getId();
+    String getName();
+    int getAge();
+    Date getRegTime();
+    void setName(String name);
+    void setAge(int age);
+    void setRegTime(Date date);
+}</programlisting>
+
+      <programlisting>public class UserInfoImpl implements UserInfo {
+    private Long id;
+    private String name;
+    private int age;
+    private Date regTime;
+    public UserInfoImpl() {
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public Long getId() {
+        return id;
+    }
+......</programlisting>
+
+      <para>示例包含3个配置文件，主配置文件samples.properties如下：</para>
+
+      <programlisting>#是否使用spring的ApplicationContext来生成示例类的示例
+oqs.useSpringBeanFactory=false
+
+#oqs的配置文件在classpath中的位置
+oqs.config=/oqs.properties
+
+#指定使用spring的ApplicationContext时其配置文件的名称和位置
+spring.config=applicationContext.xml</programlisting>
+
+      <para>另外两个配置文件：oqs.properties指定了JDBC的参数和QueryFactory的参数，applicationContext.xml则是在使用Spring的容器生成类时所必需的配置文件。</para>
+
+      <note>
+        <para>使用Spring容器需要更多的类库，在发行包的lib或者samples的lib中可能并不包含这些LIB。</para>
+      </note>
+
+      <para>示例包文件说明：</para>
+
+      <orderedlist>
+        <listitem>
+          <para>Utils：用于读取配置文件的工具类。</para>
+        </listitem>
+
+        <listitem>
+          <para>Samples：示例的主要配置信息读取类。</para>
+        </listitem>
+
+        <listitem>
+          <para>QueryFactoryFactory：用编程的方式来生成QueryFactory，主要方法是getQueryFactory()。</para>
+        </listitem>
+
+        <listitem>
+          <para>SpringBeanFactory：获取spring的ApplicationContext的类。</para>
+        </listitem>
+
+        <listitem>
+          <para>Main：示例主程序。</para>
+        </listitem>
+      </orderedlist>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>示例</title>
+
+      <para>Main示例可以根据配置来决定是通过编程来创建Main实例还是从Spring容器中获取，代码如下：</para>
+
+      <programlisting>public static void main(String[] args) {
+  Main main = null;
+  if(Samples.useSpringBeanFactory())
+  {
+    main = (Main) SpringBeanFactory.getAc().getBean("mainProxy");
+  }
+  else
+  {
+    QueryFactory qf = QueryFactoryFactory.getQueryFactory();
+    main = new Main(qf);
+  }
+......</programlisting>
+
+      <para></para>
+
+      <section>
+        <title>数据更新</title>
+
+        <section>
+          <title>插入</title>
+
+          <programlisting>    public void inertData() {
+        String sql = "insert into userinfo(id, name, age, regtime) values(?,?,?,?)";
+        //单条插入
+        int rows = factory.createQuery(sql)
+                   .setLong(0, 7).setString(1, "test name").setInteger(2, 25).
+                   setTimestamp(3, new Date()).executeUpdate();
+        System.out.println(rows + " 条更新");
+
+        //批量更新
+        TypedValue[] tv1 = {new TypedValue(11L, Type.LONG),
+                           new TypedValue("name0", Type.STRING),
+                           new TypedValue(22, Type.INTEGER),
+                           new TypedValue(new Date(), Type.TIMESTAMP)};
+        TypedValue[] tv2 = {new TypedValue(12L, Type.LONG),
+                           new TypedValue("name2", Type.STRING),
+                           new TypedValue(32, Type.INTEGER),
+                           new TypedValue(new Date(), Type.TIMESTAMP)};
+
+        PreparedStatementBatcher batcher = factory.createBatcher(sql);
+        int[] result = batcher.addBatch(tv1).addBatch(tv2).executeBatch();
+        System.out.println(result.length);
+    }</programlisting>
+
+          <para>以上代码示范简单的插入一条数据以及批量的插入多条数据。OQS使用Query的executeUpdate()来执行非批量的更新。</para>
+
+          <para>批量更新使用了QueryFactory的createBatcher方法，QueryFactory有两个createBatcher函数，一个是带参数的Batcher，一个是无参数的Batcher。</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>createBatcher(String sql)
+              返回PreparedStatementBatcher对象，内部使用PreparedStatement实现批量更新，使用addBatch(TypedValue[])每次增加一条数据。TypedValue[]
+              的长度应该与sql中所含的“?”数量一致。</para>
+            </listitem>
+
+            <listitem>
+              <para>createBatcher()返回StatementBatcher对象，内部使用Statement实现批量更新，使用addBatch(String
+              sql])每次增加一条SQL。</para>
+            </listitem>
+          </itemizedlist>
+
+          <para></para>
+
+          <programlisting>    public void insertIntoUserInfo2() {
+        String sql = "insert into userinfo2(name, age, regtime) values(?,?,?)";
+        Serializable id = factory.createQuery(sql).setString(0, "name0").
+                          setInteger(1, 30).setTimestamp(2, new Date()).insert();
+        System.out.println("自动产生的ID是：" + id);
+    }</programlisting>
+
+          <para>Query的insert()方法专门用于向自动生成主键的表中插入数据，此方法的特点就是在插入完成后，会返回数据库自动生成的主键。使用此方法必须配置QueryFactory的Dialect。</para>
+        </section>
+
+        <section>
+          <title>修改</title>
+
+          <programlisting>    //根据ID查找对象
+    public UserInfo getUserInfo(long id){
+        String sql = "select new UserInfoImpl(id, name, age, regTime)"
+             + " from userinfo where id=?";
+        return (UserInfo) factory.createQuery(sql).setLong(0, id).uniqueResult();
+    }     
+
+    public void update() {
+        long id = 2;
+        UserInfo ui = getUserInfo(id);
+        System.out.println("before update: " + ui);
+        factory.createQuery("update userinfo set name=? where id=?")
+                .setString(0, "Another name").setLong(1, id)
+                .executeUpdate();
+        ui = getUserInfo(id);
+        System.out.println("after update: " + ui);
+    }</programlisting>
+
+          <para>以上代码对一条对象进行更新并显示更新前后的值。</para>
+
+          <programlisting>    public void update2(){
+        String sql1 = "update userinfo set name=name1 where id=1";
+        String sql2 = "update userinfo set name=name2 where id=2";
+        factory.createBatcher().addBatch(sql1).addBatch(sql2).executeBatch();
+        UserInfo u1 = getUserInfo(1);
+        UserInfo u2 = getUserInfo(2);
+        System.out.println("after update: \n" + u1 + "\n" + u2);
+    }</programlisting>
+
+          <para>以上代码调用StatementBatcher进行批量更新。</para>
+        </section>
+
+        <section>
+          <title>删除</title>
+
+          <programlisting>  public void delete() {
+      int rows = factory.createQuery("delete from userinfo2 where id=?")
+           .setLong(0, 2).executeUpdate();
+      System.out.println(rows);
+  }   </programlisting>
+
+          <para>以上代码可执行对数据的删除操作。</para>
+        </section>
+      </section>
+
+      <section>
+        <title>数据查询</title>
+
+        <section>
+          <title>查询结果映射到类</title>
+
+          <programlisting>    public void viewAllUserInfoImpl() {
+        String sql = "select new UserInfoImpl(id, name, age, regTime) from userinfo";
+        List&lt;UserInfo&gt; list = factory.createQuery(sql).list();
+        for (UserInfo ui : list) {
+            System.out.println(ui);
+        }
+    }</programlisting>
+
+          <para>将表中每条记录映射成一个UserInfoImpl的实例，对象的属性名即字段名。当属性名与字段名称不一致时，可给字段设置别名，字段的别名即属性名。<emphasis
+          role="bold">属性名是大小写敏感的</emphasis>。</para>
+        </section>
+
+        <section>
+          <title>查询结果映射到接口</title>
+
+          <programlisting>    public void viewAllUserInfo() {
+        String sql = "select new UserInfo(id, name, age, regTime) from userinfo";
+        List&lt;UserInfo&gt; list = factory.createQuery(sql).list();
+        for (UserInfo ui : list) {
+            System.out.println(ui);
+        }
+    }</programlisting>
+
+          <para>映射到接口时，将会使用<emphasis
+          role="bold">JDK动态代理</emphasis>自动生成一个接口的实现。</para>
+        </section>
+
+        <section>
+          <title>查询结果映射到Map</title>
+
+          <programlisting>    public void viewAllForMap() {
+        String sql = "select new map(id, name, age, regTime) from userinfo";
+        List&lt;Map&gt; list = factory.createQuery(sql).list();
+        for (Map ui : list) {
+            System.out.println(ui);
+        }
+    }</programlisting>
+
+          <para>每一条查询结果记录映射成一个java.util.Map对象，Map的key将使用此处QS描述的字段的别名，如果没有设置别名，则默认取字段名称。别名大小写敏感。</para>
+        </section>
+
+        <section>
+          <title>查询结果映射到List</title>
+
+          <programlisting>    public void viewAllForList() {
+        String sql = "select new list(id, name, age, regTime) from userinfo";
+        List&lt;List&gt; list = factory.createQuery(sql).list();
+        for (List ui : list) {
+            System.out.println(ui);
+        }
+    }</programlisting>
+
+          <para>每一条查询结果记录映射成一个java.util.List对象，依次存放此处QS描述的字段的值。</para>
+
+          <programlisting>    public void viewAllForList2() {
+        String sql = "select new list(*) from userinfo";
+        List&lt;List&gt; list = factory.createQuery(sql).list();
+        for (List ui : list) {
+            System.out.println(ui);
+        }
+    }</programlisting>
+
+          <para>每一条查询结果记录映射成一个java.util.List对象，依次存放所有字段的值。</para>
+        </section>
+
+        <section>
+          <title>查询结果映射嵌套的对象</title>
+
+          <programlisting>    public void viewAllForMap2() {
+        String sql = "select new map(id, name, new list(age, regTime) as thelist) from userinfo";
+        List&lt;Map&gt; list = factory.createQuery(sql).list();
+        for (Map map : list) {
+            System.out.println(map);
+        }
+    }</programlisting>
+
+          <para>每一条查询结果记录映射成一个java.util.Map对象。map的第一项key=id，value=字段id的值；第二项key=name，value=字段name的值；字段第三项key=thelist，值是一个List对象（List对象的结构参看前面的示例）。</para>
+
+          <para>嵌套可以查询的对象层次在理论上是可以无限多的，但在实际应用中一般没有这样的需求，但OQS仍然支持这个功能。</para>
+        </section>
+
+        <section>
+          <title>分页查询</title>
+
+          <programlisting>    public void viewPagedUserInfo() {
+        String sql = "select new UserInfoImpl(id, name, age, regTime) from userinfo";
+        List&lt;UserInfo&gt; list = factory.createQuery(sql).setFirstResult(0)
+           .setMaxResults(2).list();
+        System.out.println(list.size() == 2);
+        for (UserInfo ui : list) {
+            System.out.println(ui);
+        }
+    }</programlisting>
+
+          <para>按每页2条查询数据并映射到对象。</para>
+
+          <para>OQS分页查询操作上是与数据库无关的，但必须设置Dialect.。除了OQS已经实现的Dialect，如果需要访问其他数据库，还可以直接使用Hibernate3的Dialect。</para>
+        </section>
+
+        <section>
+          <title>参数查询</title>
+
+          <programlisting>    //使用占位参数的条件查询
+    public void viewUserInfoWhere() {
+        String sql = "select new UserInfoImpl(id, name, age, regTime)"
+                     + " from userinfo where id &gt; ?";
+        List&lt;UserInfo&gt; list = factory.createQuery(sql).setLong(0, 2).list();
+        for (UserInfo ui : list) {
+            System.out.println(ui);
+        }
+    }
+    //使用命名参数的条件查询
+    public void viewUserInfoWhere2(){
+        String sql = "select new UserInfoImpl(id, name, age, regTime)"
+                     + " from userinfo where id &gt; :id";
+        List&lt;UserInfo&gt; list = factory.createQuery(sql).setLong("id", 2).list();
+        for (UserInfo ui : list) {
+            System.out.println(ui);
+        }
+    }
+    //使用集合作为命名参数的值
+    public void viewUserInfoWhere3() {
+        String sql = "select new UserInfoImpl(id, name, age, regTime)"
+                     + " from userinfo where id in (:id)";
+        List&lt;UserInfo&gt; list = factory.createQuery(sql)
+              .setParameterList("id",new Long[]{1L,2L})
+              .list();
+        for (UserInfo ui : list) {
+            System.out.println(ui);
+        }
+    }</programlisting>
+
+          <para>以上展示了2种不同的参数查询。</para>
+
+          <para>占位参数的索引从0开始。</para>
+
+          <para>命名参数以“：”开头，最终的QS中，命名参数会被转化为占位参数。</para>
+
+          <para>将QueryFactory的SQL调试信息显示级别（showSql）设置成大于2的值时，在控制台可以看到从原始QS到SQL转化过程中所有中间过程语句。</para>
+        </section>
+
+        <section>
+          <title>Criteria查询</title>
+
+          <programlisting>      public void viewUserInfoByCriteria(){
+        String sql = "select new UserInfoImpl(id, name, age, regTime) from userinfo";
+        Criterion c1 = Restrictions.gt("id", 1);
+        Order order = Order.asc("name");
+        List&lt;UserInfo&gt; list = factory.createCriteria(sql)
+              .add(c1).addOrder(order).list();
+        for (UserInfo ui : list) {
+            System.out.println(ui);
+        }
+    }
+
+    public void viewUserInfoByCriteria2(){
+        String sql = "select new UserInfoImpl(id, name, age, regTime) from userinfo";
+        Criterion c1 = Restrictions.gt("id", 1);
+        Criterion c2 = Restrictions.lt("id", 14);
+        Order order = Order.asc("name").add(Order.asc("id"));
+        Criterion c = Restrictions.logic(c1).and(c2);
+        List&lt;UserInfo&gt; list = factory.createCriteria(sql)
+              .add(c).addOrder(order).list();
+        for (UserInfo ui : list) {
+            System.out.println(ui);
+        }
+    }</programlisting>
+
+          <para>Criteria查询是一种比较灵活的条件查询方式，一般QS语句中只写查询的主干，查询条件可以任意组合，组合后将生成SQL执行。</para>
+        </section>
+
+        <section>
+          <title>带多个“*”的查询</title>
+
+          <programlisting>      public void view2list() {
+        String sql = "select new list(a.*(4)), new list(b.*), b.name"
+                     + " from userinfo a, userinfo2 b"
+                     + " where a.id=b.id";
+        List&lt;Object[]&gt; list = factory.createQuery(sql).list();
+        for (Object[] os : list) {
+            System.out.println(os[0] + " -- " + os[1] + " -- " + os[2]);
+        }
+    }</programlisting>
+
+          <para><emphasis
+          role="bold">当一条查询语句中带多个“*”时，要么给Query对象指定Mapper(调用setMapper)，要么必须在QS中*的后面的括号中指定此“*”共代表了多少个字段。如果一条QS有N(N&gt;1)个“*”，则至少需要指定其中任意N-1个“*”所代表的字段数，也可以全部指定（如：select
+          a.*(4), b.*(4) from userinfo a, userinfo2 b where
+          a.id=b.id）。</emphasis></para>
+        </section>
+      </section>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>事务管理</title>
+
+    <para>OQS的底层数据库访问是采用JDBC直接实现的，所以在数据源的范围内采用基于一个和JDBC连接关联的事务，多数据源的情况可以考虑使用JTA来管理事务，其编程接口大致是一致的。除了编程式的事务管理，OQS结合Spring的ApplicationContext配置也可以实现声明式事务管理。无论是编程式的事务管理还是声明式的事务管理，事务都是可以跨越多个资源的。</para>
+
+    <section>
+      <title>编程式事务管理</title>
+
+      <para>OQS提供两种方式的编程式事务管理</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>使用TransactionTemplate</para>
+        </listitem>
+
+        <listitem>
+          <para>直接使用一个Transaction实现</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>我们通常推荐使用第一种。</para>
+
+      <para>第二种方式类似使用JTA UserTransaction API
+      或者Spring框架的PlatformTransactionManager。</para>
+
+      <section>
+        <title>使用TransactionTemplate</title>
+
+        <para>TransactionTemplate使用回调方法，把应用程序代码从处理取得和释放资源中解脱出来（不再有try/catch/finally）。TransactionTemplate是线程安全的。</para>
+
+        <para>必须在事务上下文中执行的应用代码看起来像这样，注意使用 TransactionCallback可以返回一个值：</para>
+
+        <programlisting>TransactionTemplate tt = new TransactionTemplate(queryFactory);
+Object result = tt.execute(new TransactionCallback() 
+{
+    public Object doInTransaction(QueryFactory qf) 
+    {
+        //execute your business logic here
+        qf.createQuery("update userinfo set name='a'").executeUpdate();
+        return qf.createQuery("select name from userinfo").list();
+    }
+});</programlisting>
+      </section>
+
+      <section>
+        <title>使用Transaction</title>
+
+        <para>使用 Transaction 直接管理事务，开始事务、提交事务以及在异常时回滚事务。示例如下：</para>
+
+        <programlisting>Transaction tx = queryFactory.beginTransaction();
+try
+{
+  //execute your business logic here
+  tx.commit();
+}
+catch(Exception ex)
+{
+  tx.rollback();
+  throw ex;
+}</programlisting>
+
+        <note>
+          <para>如果您需要在您的代码中直接使用JDBC的Connection并且需要事务管理，那么Connection必须从QueryFactory对象的ConnectionManager中获得而不是调用DataSouce的getConnection()，使用后也必须调用ConnectionManager的releaseConnection方法而不是Connection.close()，例如：</para>
+
+          <programlisting>Transaction tx = queryFactory.beginTransaction();
+try
+{
+  //execute your business logic here
+  Connection conn = queryFactory.getConnectionManager().getConnection();
+  //execute jdbc operations here
+  queryFactory.getConnectionManager().releaseConnection(conn);  
+  tx.commit();
+}
+catch(Exception ex)
+{
+  tx.rollback();
+  throw ex;
+}</programlisting>
+        </note>
+
+        <para>编程时事务处理示例如下：</para>
+
+        <programlisting>    public void transaction() {
+        Transaction tx = factory.beginTransaction();
+        try {
+            factory.createQuery("update userinfo set name='t1' where id=1").executeUpdate();
+            factory.createQuery("update userinfo set name='t2' where id=2").executeUpdate();
+            tx.commit();
+        } catch (TransactionException ex) {
+            tx.rollback();
+            throw new QueryException(ex);
+        }
+    }</programlisting>
+      </section>
+    </section>
+
+    <section>
+      <title>声明式事务管理</title>
+
+      <para>OQS借助Spring
+      AOP实现声明式事务管理，如果您的系统里已经使用了Spring的BeanFactory等特性，那么使用声明式事务管理可以较少的影响到应用代码，并且拥有和Spring声明式事务管理同样的特性和性能，更多信息请阅读《Spring开发参考手册：事务管理》。</para>
+
+      <para>在定义一个OQS实现的Spring
+      PlatformTransactionManager之前，必须先定义数据源以及QueryFactory：</para>
+
+      <programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+  &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+  &lt;property name="url" value="${jdbc.url}"/&gt;
+  &lt;property name="username" value="${jdbc.username}"/&gt;
+  &lt;property name="password" value="${jdbc.password}"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="queryFactory" class="org.opoo.oqs.spring.SpringQueryFactoryImpl"&gt;
+  &lt;property name="dataSource" ref="dataSource"/&gt;
+  &lt;property name="showSql" value="${query.show_sql}"/&gt;
+  &lt;property name="dialectClassName" value="${query.dialectClassName}"/&gt;
+  &lt;property name="beanClassLoader"&gt;
+    &lt;bean class="org.opoo.oqs.core.BeanClassLoader"&gt;
+    &lt;constructor-arg value="${query.bean_imports}"/&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>OQS实现的Spring PlatformTransactionManager定义如下：</para>
+
+      <programlisting>&lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+  &lt;property name="dataSource" ref="dataSource"/&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para></para>
+
+      <para>如果使用JTA，我们需要使用通过JNDI获得的容器数据源，和一个JtaTransactionManager实现。JtaTransactionManager不需要知道数据源，或任何其他特定资源，因为它将使用容器的全局事务管理。</para>
+
+      <programlisting>&lt;bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+    &lt;property name="jndiName"&gt;&lt;value&gt;MySQLDS&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>
+
+      <note>
+        <para>如果我们使用的是远程JNDI，还必须配置JNDI属性：</para>
+
+        <programlisting>&lt;bean id="jndiTemplate" class="org.springframework.jndi.JndiTemplate"&gt;
+  &lt;property name="environment"&gt;
+      &lt;props&gt;
+        &lt;prop key="java.naming.factory.initial"&gt;weblogic.jndi.WLInitialContextFactory&lt;/prop&gt;
+        &lt;prop key="java.naming.provider.url"&gt;t3://localhost:7001&lt;/prop&gt;
+        &lt;prop key="java.naming.security.principal"&gt;weblogic&lt;/prop&gt;
+        &lt;prop key="java.naming.security.credentials"&gt;weblogic&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+    &lt;property name="jndiName"&gt;&lt;value&gt;JDataStoreDS&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="jndiTemplate"&gt;&lt;ref local="jndiTemplate"/&gt;&lt;/property&gt;
+&lt;/bean&gt;
+
+
+&lt;bean id="transactionManager"
+      class="org.springframework.transaction.jta.JtaTransactionManager"&gt;
+  &lt;property name="jndiTemplate"&gt;&lt;ref local="jndiTemplate"/&gt;&lt;/property&gt;
+  &lt;property name="userTransactionName"&gt;
+    &lt;value&gt;weblogic/transaction/UserTransaction&lt;/value&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+      </note>
+
+      <para>在使用声明式事务管理情况下，应用程序代码不需要任何更改。我们可以仅仅更改配置来更改管理事务的方式，即使这些更改意味这从局部事务转换到全局事务或者相反的转换。</para>
+
+      <para></para>
+
+      <para>通常通过TransactionProxyFactoryBean设置Spring事务代理。我们需要一个目标对象包装在事务代理中。这个目标对象一般是一个普通Java对象的bean。当我们定义TransactionProxyFactoryBean时，必须提供一个相关的Spring
+      PlatformTransactionManager的引用和事务属性。 事务属性含有上面描述的事务定义。</para>
+
+      <programlisting>&lt;bean id="main" class="org.opoo.oqs.samples.Main"&gt;
+  &lt;property name="queryFactory" ref="queryFactory"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="mainProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="target" ref="main"/&gt;
+  &lt;property name="transactionAttributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="transaction2*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>示例Mian的transaction2方法实现如下：</para>
+
+      <programlisting>    public void transaction2() {
+        factory.createQuery("update userinfo set name='t110' where id=1").executeUpdate();
+        factory.createQuery("update userinfo set name='t220' where id=2").executeUpdate();
+    }</programlisting>
+
+      <para></para>
+    </section>
+  </chapter>
+</book>
