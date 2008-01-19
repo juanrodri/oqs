@@ -26,7 +26,7 @@ import org.opoo.oqs.type.TypeFactory;
  * @version 1.0
  */
 public class SingleProperty extends SimpleProperty implements PropertyTypeAware {
-    private int index = -1;
+    private int index;
     private Class type;
     public SingleProperty(String name, String string, int index, Class type) {
         super(name, string);

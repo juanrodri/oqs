@@ -37,9 +37,9 @@ import org.opoo.util.ClassUtils;
  */
 public abstract class AbstractMultiPropertyMapper extends SimpleProperty implements
         PropertyMapper {
-    private static final Log log = LogFactory.getLog(
-            AbstractMultiPropertyMapper.class);
+    private static final Log log = LogFactory.getLog(AbstractMultiPropertyMapper.class);
     protected PropertyMapper[] mappers;
+    private Offset offset = new Offset();
     public AbstractMultiPropertyMapper(String name, String string,
                                        PropertyMapper[] mappers) {
         super(name, string);
@@ -49,6 +49,9 @@ public abstract class AbstractMultiPropertyMapper extends SimpleProperty impleme
     public AbstractMultiPropertyMapper(Property sp, PropertyMapper[] mappers) {
         super(sp);
         this.mappers = mappers;
+    }
+    public void setOffset(Offset offset){
+	this.offset = offset;
     }
 
     /**
@@ -61,15 +64,19 @@ public abstract class AbstractMultiPropertyMapper extends SimpleProperty impleme
         Assert.notEmpty(mappers, "mappers is required.");
         List list = new ArrayList();
         boolean hasAsterisk = false;
+	//int extraCount = 0;
         for (int i = 0; i < mappers.length; i++) {
             PropertyMapper mapper = mappers[i];
             //setParametersFor(mapper);
             //初始化每一个MAPPER
+	    log.debug("setting offset " + offset + " for " + mapper);
+	    mapper.setOffset(offset);
             mapper.initialize(rsmd);
 
-            if (mappers[i] instanceof AsteriskPropertyMapper) {
+            if (mapper instanceof AsteriskPropertyMapper) {
                 AsteriskPropertyMapper apm = (AsteriskPropertyMapper) mapper;
-                list.addAll(Arrays.asList(apm.getSinglePropertyMappers()));
+		list.addAll(Arrays.asList(apm.getSinglePropertyMappers()));
+		processExtraCount(apm.getExtraCount());
                 hasAsterisk = true;
             } else {
                 list.add(mapper);
@@ -82,6 +89,12 @@ public abstract class AbstractMultiPropertyMapper extends SimpleProperty impleme
         //forced gc
         list = null;
         //return map0(rs, rowNum);
+    }
+
+    void processExtraCount(int cnt) {
+        if (cnt > 0) {
+            offset.setOffset(cnt);
+        }
     }
 
 

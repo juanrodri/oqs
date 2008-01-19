@@ -195,4 +195,8 @@ public class SpringQueryImpl extends AbstractQuery {
         jdbcTemplate.setQueryTimeout(timeout);
         return this;
     }
+
+    protected Object queryForObject(String sql, Class clazz) {
+        return jdbcTemplate.queryForObject(sql, clazz);
+    }
 }

@@ -17,6 +17,8 @@
  */
 package org.opoo.oqs.dialect;
 
+import java.sql.Types;
+
 /**
  *
  * @author Alex Lin(alex@opoo.org)
@@ -57,6 +59,11 @@ public class HibernateDialectWrapper implements Dialect {
     public String getIdentitySelectString(String table, String column, int type) {
         return dialect.getIdentitySelectString(table, column, type);
     }
+
+    public String getIdentitySelectString() {
+	return dialect.getIdentitySelectString(null, null, Types.OTHER);
+    }
+
 
 
     public String getLimitString(String querySelect, int offset, int limit) {

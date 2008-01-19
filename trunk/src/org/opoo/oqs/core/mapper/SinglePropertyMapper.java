@@ -52,8 +52,9 @@ public class SinglePropertyMapper extends SingleProperty implements
             log.debug("get by index: " + getIndex());
             return getColumnValue(rs, getIndex());
         } else {
-            log.debug("get by name: " + getName());
-            return getColumnValue(rs, getName());
+            //log.debug("get by name: " + getName());
+            //return getColumnValue(rs, getName());
+	    throw new SQLException("只能使用索引取值，不支持通过字段名称获取。");
         }
     }
 
@@ -152,5 +153,16 @@ public class SinglePropertyMapper extends SingleProperty implements
 
     public Class getReturnType() {
         return null;
+    }
+
+    /**
+     * 当前面有*的属性时，此处设置其偏移量。
+     * @param offset int
+     */
+    public void setOffset(Offset offset) {
+        if (offset.getOffset() > 0) {
+	    log.debug("setting offset: " + offset + " for " + this);
+            setIndex(getIndex() + offset.getOffset());
+        }
     }
 }

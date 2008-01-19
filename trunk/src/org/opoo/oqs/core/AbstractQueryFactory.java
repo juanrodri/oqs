@@ -27,6 +27,7 @@ import org.opoo.oqs.CannotCreateQueryException;
 import org.opoo.oqs.CannotCreateQueryFactoryException;
 import org.opoo.oqs.Criteria;
 import org.opoo.oqs.Oqs;
+import org.opoo.oqs.QueryException;
 import org.opoo.oqs.QueryFactory;
 import org.opoo.oqs.dialect.Dialect;
 import org.opoo.oqs.dialect.HibernateDialectWrapper;
@@ -61,9 +62,7 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     }
 
     public AbstractQueryFactory() {
-        if (log.isDebugEnabled()) {
-            log.debug("OQS QueryFactory: " + getClass().getName());
-        }
+            log.info("OQS QueryFactory: " + getClass().getName());
     }
 
     public AbstractQueryFactory(DataSource dataSource) {
@@ -112,10 +111,8 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     /**
      * 设置所使用的Dialect的类全名。
      * @param classname String
-     * @throws CannotCreateQueryFactoryException
      */
-    public void setDialectClassName(String classname) throws
-            CannotCreateQueryFactoryException {
+    public void setDialectClassName(String classname){
         try {
             Object object = ClassUtils.newInstance(classname);
             if (object instanceof org.hibernate.dialect.Dialect) {
@@ -124,8 +121,7 @@ public abstract class AbstractQueryFactory implements QueryFactory,
                 dialect = (Dialect) object;
             }
         } catch (Exception ex) {
-            throw new CannotCreateQueryFactoryException(
-                    "Can not create Dialect.", ex);
+            throw new QueryException("Can not create Dialect.", ex);
         }
     }
 

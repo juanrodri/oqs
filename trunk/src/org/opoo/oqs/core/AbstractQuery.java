@@ -1209,7 +1209,10 @@ public abstract class AbstractQuery implements Query {
             isUpdate = true;
         } else if (operation.startsWith("{")) {
             isCall = true;
-        } else {
+        } else if (dialect != null && dialect.getIdentitySelectString() != null
+		&& dialect.getIdentitySelectString().startsWith(operation)){
+	    isSelect = true;
+	} else {
             throw new QueryException(
                     "Syntax error, unsupport manipulate symbol '"
                     + operation + "'", msql);
@@ -1381,7 +1384,9 @@ public abstract class AbstractQuery implements Query {
                 manager.releaseConnection(conn);
             }
         } catch (SQLException ex) {
-            throw new QueryException("could not insert: ", ex);
+            //throw new QueryException("could not insert: ", ex);
+	    log.debug("could not get id for insert, using getPostInsertGeneratedIndentity(): "
+		    + ex.getMessage());
         }
         return getPostInsertGeneratedIndentity();
     }
@@ -1448,26 +1453,15 @@ public abstract class AbstractQuery implements Query {
      * @return Serializable
      */
     private Serializable getPostInsertGeneratedIndentity() {
-        final String sql = dialect.getIdentitySelectString(null, null,
-                Types.OTHER);
-        return (Serializable) queryFactory.createQuery(sql).uniqueResult();
+        final String sql = dialect.getIdentitySelectString();
+        //return (Serializable) queryFactory.createQuery(sql).uniqueResult();
+	return (Serializable) queryForObject(sql, Serializable.class);
     }
+
+    protected abstract Object queryForObject(String sql, Class clazz);
 }
 
 
-/**
- *
- * <p>Title: Framework</p>
- *
- * <p>Description: orm</p>
- *
- * <p>Copyright: Copyright (c) 2006</p>
- *
- * <p>Company: </p>
- *
- * @author Alex Lin(alex@opoo.org)
- * @version 1.1
- */
 class ListResultSetHandler implements ResultSetHandler {
     private final Mapper mapper;
     private final int rowsExpected;

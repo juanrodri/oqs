@@ -417,6 +417,9 @@ public abstract class ClassUtils {
 
     public static class PackageClassLoader extends ClassLoader {
         private String[] imports;
+        public PackageClassLoader() {
+            super();
+        }
         public PackageClassLoader(String imports) {
             super();
             setImports(new String[] {imports});
