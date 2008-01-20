@@ -213,7 +213,7 @@
 
 
 
-   <target name="pub-src" depends="usage" description="Create source distribution (compressed) ready for publication based on your LOCAL CVS sources">
+   <target name="pub-src" depends="dist" description="Create source distribution (compressed) ready for publication based on your LOCAL CVS sources">
         <mkdir dir="${pub.home}"/>
         <echo>Warning: The source files used to create this source distribution come from your local copy of the source files.</echo>
         <!-- Source properties -->
