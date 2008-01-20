@@ -234,7 +234,7 @@
 		   <zipfileset dir="." includes="readme.txt" prefix="${final.name}/"/>
 		   <zipfileset dir="." includes="changelog.txt" prefix="${final.name}/"/>
 		   <zipfileset dir="conf" includes="*.MF" prefix="${final.name}/conf/"/>
-		   <zipfileset dir="${docs.home}" prefix="${final.name}/docs/" excludes="**/api/**"/>
+		   <zipfileset dir="${docs.home}" prefix="${final.name}/docs/" includes="reference/html*/**"/>
 		   <zipfileset dir="${samples.home}" prefix="${final.name}/samples/"/>
         </zip>
         <checksum algorithm="md5" file="${zip-src.path}" fileext=".md5"/>
@@ -247,7 +247,7 @@
 			<tarfileset dir="${lib.home}" prefix="${final.name}/lib/">
 				<patternset refid="oqs.lib"/>
 			</tarfileset>
-			<tarfileset dir="${docs.home}" prefix="${final.name}/docs/" excludes="**/api/**"/>
+			<tarfileset dir="${docs.home}" prefix="${final.name}/docs/" includes="reference/html*/**"/>
 			<tarfileset dir="." includes="build.xml" prefix="${final.name}/"/>
 			<tarfileset dir="." includes="default.properties" prefix="${final.name}/"/>
 			<tarfileset dir="." includes="license.txt" prefix="${final.name}/"/>
