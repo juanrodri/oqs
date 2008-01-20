@@ -5,7 +5,7 @@
   <bookinfo>
     <title>OQS- Java Simple O/R Mapping &amp; JDBC Extensions</title>
 
-    <subtitle>oqs - 1.0开发参考手册</subtitle>
+    <subtitle>oqs - 0.1开发参考手册</subtitle>
 
     <author>
       <firstname>Alex</firstname>
@@ -18,7 +18,7 @@ Email : <email>alex@opoo.org</email></address>
       </affiliation>
     </author>
 
-    <releaseinfo>Version 1.0</releaseinfo>
+    <releaseinfo>Version 0.1</releaseinfo>
 
     <legalnotice>
       <para>Copies of this document may be made for your own use and for
