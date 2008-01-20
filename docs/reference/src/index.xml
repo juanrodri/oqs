@@ -18,7 +18,7 @@ Email : <email>alex@opoo.org</email></address>
       </affiliation>
     </author>
 
-    <releaseinfo>Version 1.0-dev</releaseinfo>
+    <releaseinfo>Version 1.0</releaseinfo>
 
     <legalnotice>
       <para>Copies of this document may be made for your own use and for
@@ -274,9 +274,7 @@ List list = queryFactory.createQuery("select * from UserInfo").setMapper(mapper)
             <row>
               <entry>Hibernate 3.0(编译必需、运行可选)</entry>
 
-              <entry>当Querist使用Spring Framework
-              jdbc作为底层JDBC操作时，QueryFactory要选用com.lcql.framework.querist.impl.SpringJdbcQueryFactoryImpl，此时需要Spring
-              Framework jdbc，core等相关类库。</entry>
+              <entry>当OQS提供的Dialect不能满足需求时可以直接使用Hibernate3的Dialect。</entry>
             </row>
           </tbody>
         </tgroup>
