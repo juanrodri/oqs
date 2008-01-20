@@ -71,9 +71,9 @@
         <copy todir="${build.home}/conf" filtering="on">
             <fileset dir="${conf.home}" includes="*.MF"/>
         </copy>
-		<copy todir="${build.home}/docs" filtering="on">
+<!-- 		<copy todir="${build.home}/docs" filtering="on">
             <fileset dir="${docs.home}" includes="**/*.xml"/>
-        </copy>
+        </copy> -->
     </target>
 
 	<target name="compile" depends="static" description="Compile shareable components">
@@ -136,7 +136,7 @@
         <copy file="${basedir}/readme.txt" todir="${dist.home}"/>
 		<copy file="${basedir}/notice.txt" todir="${dist.home}"/>
 		<copy file="${basedir}/changelog.txt" todir="${dist.home}"/>
-		<copy todir="${dist.home}/docs"><fileset dir="${docs.home}"/></copy>
+		<copy todir="${dist.home}/docs/"><fileset dir="${docs.home}" includes="reference/html*/**"/></copy>
         <antcall target="jar"/>
     </target>
 
@@ -174,6 +174,7 @@
         <!-- Zip binary dist -->
         <zip destfile="${zip.path}">
 			<zipfileset dir="${dist.home}" prefix="${final.name}/"/>
+			<zipfileset dir="${samples.home}" prefix="${final.name}/samples/"/>
 			<zipfileset refid="lib.files" prefix="${final.name}/lib/"/>
         </zip>
         <checksum algorithm="md5" file="${zip.path}" fileext=".md5"/>
@@ -181,6 +182,7 @@
         <!-- Tar & gzip binary dist -->
         <tar tarfile="${tar.path}">
 			<tarfileset dir="${dist.home}" prefix="${final.name}/"/>
+			<tarfileset dir="${samples.home}" prefix="${final.name}/samples/"/>
 			<tarfileset dir="${lib.home}" prefix="${final.name}/lib/">
 				<patternset refid="oqs.lib"/>
 			</tarfileset>
@@ -218,6 +220,7 @@
 		   <zipfileset dir="." includes="changelog.txt" prefix="${final.name}/"/>
 		   <zipfileset dir="conf" includes="*.MF" prefix="${final.name}/conf/"/>
 		   <zipfileset dir="${docs.home}" prefix="${final.name}/docs/" excludes="**/api/**"/>
+		   <zipfileset dir="${samples.home}" prefix="${final.name}/samples/"/>
         </zip>
         <checksum algorithm="md5" file="${zip-src.path}" fileext=".md5"/>
         <checksum algorithm="sha" file="${zip-src.path}" fileext=".sha"/>
@@ -237,6 +240,7 @@
 			<tarfileset dir="." includes="readme.txt" prefix="${final.name}/"/>
 			<tarfileset dir="." includes="changelog.txt" prefix="${final.name}/"/>
 			<tarfileset dir="conf" includes="*.MF" prefix="${final.name}/conf/"/>
+			<tarfileset dir="${samples.home}" prefix="${final.name}/samples/"/>
 		</tar>
         <gzip zipfile="${gz-src.path}" src="${tar-src.path}"/>
         <checksum algorithm="md5" file="${gz-src.path}" fileext=".md5"/>
@@ -250,6 +254,122 @@
 
     <target name="pub" depends="pub-bin, pub-src" description="Create binary and source distribution (compressed) ready for publication">
     </target>
+
+
+
+
+
+	<target name="doc.prepare" description="Extra preparation for the documentation">
+		<fail message="XSLT supporting lib not installed. Please see '${doc.ref.dir}/readme.txt' for instructions.">
+			<condition>
+				<not>
+					<available file="${basedir}/${doc.ref.dir}/lib"/>
+				</not>
+			</condition>
+		</fail>
+	</target>
+
+	<target name="doc.htmlsingle" depends="doc.prepare" description="Compile reference documentation to single html">
+		<mkdir dir="${dist.ref.dir}/html_single/images"/>
+		<copy todir="${basedir}/${dist.ref.dir}/html_single/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${basedir}/${dist.ref.dir}/html_single/" file="${basedir}/${doc.ref.dir}/styles/html.css" failonerror="false"/>
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.dir}/reference/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.ref.dir}/html_single/index.html"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
+		</java>
+	</target>
+
+	<target name="doc.html" depends="doc.prepare" description="Compile reference documentation to chunked html">
+		<mkdir dir="${dist.ref.dir}/html/images"/>
+		<copy todir="${basedir}/${dist.ref.dir}/html/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="**/*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${basedir}/${dist.ref.dir}/html/" failonerror="false">
+			<fileset dir="${basedir}/${doc.ref.dir}/styles/">
+				<include name="*.css"/>
+				<include name="*.js"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.ref.dir}/html/">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
+		</java>
+	</target>
+
+
+	<target name="doc.pdf" depends="doc.prepare" description="Compile reference documentation to pdf">
+		<mkdir dir="${basedir}/${dist.ref.dir}/pdf/images"/>
+		<copy todir="${basedir}/${dist.ref.dir}/pdf/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="**/*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
+			<!-- controls the double sided pagination style -->
+			<arg value="double.sided=${double.sided}"/>
+			
+		</java>
+
+		<available property="custom.fop.userconfig.present" file="userconfig.xml" filepath="${basedir}/${doc.ref.dir}/fop" />
+
+		<java classname="org.apache.fop.apps.Fop" fork="true" maxmemory="256m" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/oqs-reference.pdf"/>
+		</java>
+		<delete file="${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+	</target>
+
 
 
 
