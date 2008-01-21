@@ -6,8 +6,9 @@ $Id$
 
 1. BUILD AND RUN
 
-  示例包含build.xml文件，可以用ant来执行。
-  运行实例代码需要JDK1.5以上版本（OQS可以在JDK1.4.2上运行）。
+  示例包含编译后class，编译示例需要spring容器相关包。
+
+  运行示例代码需要JDK1.5以上版本（OQS可以在JDK1.4.2上运行），以及commons-dbcp和commons-pool包。
 
 
 2. 文件说明
