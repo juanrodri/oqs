@@ -3,14 +3,17 @@ OQS CHANGELOG
 http://www.opoo.org
 
 
-Changes in version 0.1 (2008-01-16)
+
+Changes in version 0.1 RC2 (@RELEASE_DATE@)
 -----------------------------------------
+* fixed   运行时必须依赖Hibernate3的BUG. OQS不再依赖Hibernate，可独立运行。
+* improve QueryFactory的属性'dialectClassName'不再是必须的，OQS根据DataSource类型判断SQL Dialect，
+          前提是classpath中存在Hibernate3的类库。
 
 
 
-
-
-
+Changes in version 0.1 RC1 (2008-01-16)
+-----------------------------------------
 
 
 

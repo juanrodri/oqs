@@ -229,7 +229,7 @@ public abstract class ClassUtils {
      */
     public static String getSimpleName(Class clazz) {
         try {
-            Method m = clazz.getClass().getMethod("getSimpleName", new Class[]{});
+            Method m = Class.class.getMethod("getSimpleName", new Class[]{});
             return (String) m.invoke(clazz, (Object[])null);
         } catch (Exception ex) {
             return getPureName(clazz);

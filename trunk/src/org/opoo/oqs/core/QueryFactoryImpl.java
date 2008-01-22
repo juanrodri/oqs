@@ -19,24 +19,6 @@ public class QueryFactoryImpl extends AbstractQueryFactory {
     public QueryFactoryImpl() {
     }
 
-    public void setDataSource(final DataSource dataSource) {
-        super.setDataSource(dataSource);
-        super.setConnectionManager(new ConnectionManager() {
-            public Connection getConnection() throws DataAccessException {
-                try {
-                    return dataSource.getConnection();
-                } catch (SQLException ex) {
-                    throw new DataAccessException(ex);
-                }
-            }
-
-            public void releaseConnection(Connection con) {
-                JdbcUtils.close(con);
-            }
-        });
-    }
-
-
     /**
      * 取得当前数据源的Transaction并开始事务处理。
      *
@@ -74,5 +56,20 @@ public class QueryFactoryImpl extends AbstractQueryFactory {
     public Query createQuery(String queryString) throws
             CannotCreateQueryException {
         throw new UnsupportedOperationException();
+    }
+
+    protected ConnectionManager createConnectionManager(final DataSource ds) {
+        return new ConnectionManager() {
+            public Connection getConnection() throws DataAccessException {
+                try {
+                    return ds.getConnection();
+                } catch (SQLException ex) {
+                    throw new DataAccessException(ex);
+                }
+            }
+            public void releaseConnection(Connection con) {
+                JdbcUtils.close(con);
+            }
+        };
     }
 }
