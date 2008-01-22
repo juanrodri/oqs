@@ -91,7 +91,7 @@
         </copy> -->
     </target>
 
-	<target name="compile" depends="static" description="Compile shareable components">
+	<target name="compile" depends="static" description="Compile files">
 		<javac srcdir="${source.home}" destdir="${build.home}/classes" source="1.4" target="1.4" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}" failonerror="true">
 			<!-- <include name="org/opoo/oqs/**"/> -->
 			<patternset refid="oqs.sources"/>
@@ -111,7 +111,7 @@
         <delete dir="${pub.home}"/>
     </target>
 
-	<target name="all" depends="clean,compile" description="Clean and compile all components"/>
+	<target name="all" depends="clean,compile" description="Clean and compile all"/>
 
 
 	<target name="javadoc" depends="compile" description="Create component Javadoc documentation">

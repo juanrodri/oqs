@@ -17,6 +17,10 @@
  */
 package org.opoo.oqs.core;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -68,31 +72,50 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     public AbstractQueryFactory(DataSource dataSource) {
         setDataSource(dataSource);
     }
+    public DataSource getDataSource(){
+	return dataSource;
+    }
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
-        //connectionManager = new SimpleConnectionManager(dataSource);
-        //setConnectionManager(new SimpleConnectionManager(dataSource));
         //setConnectionManager(new TransactionSupportConnectionManager(dataSource));
-    }
+        this.connectionManager = createConnectionManager(dataSource);
 
-    public DataSource getDataSource() {
-        return dataSource;
+        String databaseName = null;
+        int databaseMajorVersion = 0;
+        Connection conn = null;
+        try {
+            conn = connectionManager.getConnection();
+            DatabaseMetaData meta = conn.getMetaData();
+            databaseName = meta.getDatabaseProductName();
+            databaseMajorVersion = getDatabaseMajorVersion(meta);
+            log.info("RDBMS: " + databaseName + ", version: " +
+                     meta.getDatabaseProductVersion());
+            log.info("JDBC driver: " + meta.getDriverName() + ", version: " +
+                     meta.getDriverVersion());
+        } catch (SQLException sqle) {
+            log.warn("Could not obtain connection metadata", sqle);
+        } catch (UnsupportedOperationException uoe) {
+            // user supplied JDBC connections
+        } finally {
+            connectionManager.releaseConnection(conn);
+        }
+
+        if (dialect == null) {
+            dialect = this.determineDialect(databaseName, databaseMajorVersion);
+        }
     }
+    /**
+       * 根据数据源创建ConnectionManager
+       * @param ds DataSource
+       * @return ConnectionManager
+       */
+    protected abstract ConnectionManager createConnectionManager(DataSource ds);
 
     public ConnectionManager getConnectionManager() {
         return connectionManager;
     }
 
-    /**
-     * 设置当前QueryFactory要使用的ConnectionManager。
-     * @param connectionManager ConnectionManager
-     */
-    protected void setConnectionManager(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager;
-        log.debug("Using ConnectionManager: " +
-                  connectionManager.getClass().getName());
-    }
 
     /**
      * 设置查询过程中SQL调试信息的显示级别。<br>
@@ -115,27 +138,32 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     public void setDialectClassName(String classname){
         try {
             Object object = ClassUtils.newInstance(classname);
-            if (object instanceof org.hibernate.dialect.Dialect) {
+	    if(object.getClass().getName().startsWith("org.hibernate.dialect."))
+	    {
+		//if (object instanceof org.hibernate.dialect.Dialect) {
                 setDialect((org.hibernate.dialect.Dialect) object);
             } else {
                 dialect = (Dialect) object;
             }
         } catch (Exception ex) {
-            throw new QueryException("Can not create Dialect.", ex);
+            throw new QueryException("Can not create Dialect for " + classname, ex);
         }
     }
-
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
+    public void setDialect(String dialectClassName){
+	setDialectClassName(dialectClassName);
     }
 
-    public void setDialect(org.hibernate.dialect.Dialect dialect) {
-        setDialect(new HibernateDialectWrapper(dialect));
+    private void setDialect(org.hibernate.dialect.Dialect dialect) {
+        this.dialect = new HibernateDialectWrapper(dialect);
     }
 
     public void setBeanClassLoader(ClassLoader classLoader) {
         this.beanClassLoader = classLoader;
     }
+    public void setBeanImports(String[] packages){
+	this.beanClassLoader = new BeanClassLoader(packages);
+    }
+
 
     /**
      *
@@ -209,4 +237,52 @@ public abstract class AbstractQueryFactory implements QueryFactory,
         }
         return null;
     }
+
+
+    /**
+     * 如果存在Hibernate3，则调用Hibernate3的方法来自动判断SQL Dialect.
+     * 如果classpath中找不到，则返回null。
+     *
+     * @param databaseName String
+     * @param databaseMajorVersion int
+     * @return Dialect
+     */
+    private Dialect determineDialect(String databaseName,
+                                     int databaseMajorVersion) {
+        String className = "org.hibernate.dialect.DialectFactory";
+	if (ClassUtils.isPresent(className)) {
+	    String methodName = "determineDialect";
+	    Class[] types = {String.class, int.class};
+            org.hibernate.dialect.Dialect d = null;
+            try {
+                d = (org.hibernate.dialect.Dialect) ClassUtils.forName(className)
+                    .getMethod(methodName, types)
+                    .invoke(null, new Object[] {databaseName,
+                            Integer.valueOf(databaseMajorVersion)});
+            } catch (Exception ex) {
+                log.debug("cannot determine hibernate dialect", ex);
+            }
+	    if (d != null) {
+		log.debug("Find proper dialect for " + databaseName
+			+ ": " + d.getClass().getName());
+                return new HibernateDialectWrapper(d);
+            }
+        }
+        return null;
+    }
+
+    private int getDatabaseMajorVersion(DatabaseMetaData meta) {
+        try {
+            Method gdbmvMethod = DatabaseMetaData.class.getMethod(
+                    "getDatabaseMajorVersion", (Class[])null);
+            return ((Integer) gdbmvMethod.invoke(meta, (Object[])null)).
+                    intValue();
+        } catch (NoSuchMethodException nsme) {
+            return 0;
+        } catch (Throwable t) {
+            log.debug("could not get database version from JDBC metadata");
+            return 0;
+        }
+    }
+
 }

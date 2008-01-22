@@ -53,20 +53,9 @@ public class SpringQueryFactoryImpl extends AbstractQueryFactory {
         this.setDataSource(dataSource);
     }
 
-    public void setDataSource(final DataSource ds) {
+    public void setDataSource(DataSource ds) {
         super.setDataSource(ds);
         jdbcTemplate = new JdbcTemplate(ds);
-
-        //setConnectionManager(new SpringJdbcConnectionManager(ds));
-        super.setConnectionManager(new ConnectionManager() {
-            public Connection getConnection() throws DataAccessException {
-                return DataSourceUtils.getConnection(ds);
-            }
-
-            public void releaseConnection(Connection con) {
-                DataSourceUtils.releaseConnection(con, ds);
-            }
-        });
     }
 
     /**
@@ -95,6 +84,17 @@ public class SpringQueryFactoryImpl extends AbstractQueryFactory {
     public Transaction beginTransaction() throws TransactionException {
         return new SpringJdbcTransactionFactory().beginTransaction(
                 getDataSource());
+    }
+
+    protected ConnectionManager createConnectionManager(final DataSource ds) {
+        return new ConnectionManager() {
+            public Connection getConnection() throws DataAccessException {
+                return DataSourceUtils.getConnection(ds);
+            }
+            public void releaseConnection(Connection con) {
+                DataSourceUtils.releaseConnection(con, ds);
+            }
+        };
     }
 
 
