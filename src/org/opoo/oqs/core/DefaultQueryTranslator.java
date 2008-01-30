@@ -19,6 +19,8 @@ package org.opoo.oqs.core;
 
 import org.opoo.oqs.Mapper;
 import org.opoo.util.Assert;
+import org.opoo.util.*;
+import org.opoo.oqs.*;
 
 /**
  *
@@ -40,11 +42,24 @@ public class DefaultQueryTranslator implements QueryTranslator {
         Assert.notNull(queryString, "Translator cannot accept a null string");
         String select = "";
         String from = "";
-        int pos = queryString.toLowerCase().indexOf("from");
+	String lsql = queryString.toLowerCase();
+        int pos = lsql.indexOf("from");
         if (pos == -1) {
             select = queryString.substring(7).trim();
         } else {
-            select = queryString.substring(7, pos).trim();
+            select = queryString.substring(7, pos);
+	    /**
+	     * ÅÐ¶Ï¶Ô³ÆÐÔ
+	     */
+	    while (StringUtils.countUnquoted(select, '(') !=
+                   StringUtils.countUnquoted(select, ')') && pos != -1) {
+                pos = lsql.indexOf("from", pos + 1);
+                if (pos == -1) {
+                    throw new QueryException("Invalid query string", queryString);
+                }
+		select = queryString.substring(7, pos);
+            }
+	    select = select.trim();
             from = queryString.substring(pos);
         }
 
@@ -64,6 +79,30 @@ public class DefaultQueryTranslator implements QueryTranslator {
     }
 
 
+    private int findFromPosition2(String sql, String select, int pos) {
+        int cc = 1;
+        int p = select.indexOf("(");
+        if (p != -1 &&
+            StringUtils.countUnquoted(select, '(') !=
+            StringUtils.countUnquoted(select, ')')) {
+            char[] chars = sql.toCharArray();
+            int i = p + 8;
+            while (cc != 0 && i < chars.length) {
+                if (chars[i] == '(') {
+                    cc++;
+                } else if (chars[i] == ')') {
+                    cc--;
+                }
+                i++;
+            }
+            if (cc != 0) {
+                throw new QueryException("Invalid query string", sql);
+            }
+            pos = sql.toLowerCase().indexOf("from", i);
+        }
+	return pos;
+    }
+
     public String getQueryString() {
         return queryString;
     }
@@ -74,5 +113,48 @@ public class DefaultQueryTranslator implements QueryTranslator {
 
     public String getSQLString() {
         return sql;
+    }
+
+
+    public static void main(String[] args) {
+        String sql = "select distinct new list(dcid, qid,  (select cnt from v_jxpg_dc_answers where dcid=o.dcid and qid=o.qid and result='1') as a1, (select cnt from v_jxpg_dc_answers where dcid=o.dcid and qid=o.qid and result='2') as a2, (select cnt from v_jxpg_dc_answers where dcid=o.dcid and qid=o.qid and result='3') as a3, (select cnt from v_jxpg_dc_answers where dcid=o.dcid and qid=o.qid and result='4') as a4, (select cnt from v_jxpg_dc_answers where dcid=o.dcid and qid=o.qid and result='5') as a5, (select cnt from v_jxpg_dc_answers where dcid=o.dcid and qid=o.qid and result='6') as a6 ) from v_jxpg_dc_answers o where o.dcid=? order by o.qid";
+        DefaultQueryTranslator sqt = new DefaultQueryTranslator(sql);
+        //System.out.println(sqt.sql);
+
+        String select = "distinct new list(dcid, qid,  (select cnt ";
+        System.out.println(select);
+        System.out.println(sql);
+
+        ///1.
+        long start = System.currentTimeMillis();
+        select = "distinct new list(dcid, qid,  (select cnt ";
+        int pos = 10;
+        String lsql = sql.toLowerCase();
+        while (StringUtils.countUnquoted(select, '(') !=
+               StringUtils.countUnquoted(select, ')') && pos != -1) {
+            pos = lsql.indexOf("from", pos + 1);
+            if (pos == -1) {
+                throw new QueryException("Invalid query string", sql);
+            }
+            select = sql.substring(7, pos);
+        }
+        select = select.trim();
+        String from = sql.substring(pos);
+
+        System.out.println(System.currentTimeMillis() - start);
+        System.out.println(select);
+        System.out.println(from);
+
+        //2.
+        start = System.currentTimeMillis();
+        select = "distinct new list(dcid, qid,  (select cnt ";
+        pos = 10;
+        pos = sqt.findFromPosition2(sql, select, pos);
+        select = sql.substring(7, pos);
+        from = sql.substring(pos);
+
+        System.out.println(System.currentTimeMillis() - start);
+        System.out.println(select);
+        System.out.println(from);
     }
 }
