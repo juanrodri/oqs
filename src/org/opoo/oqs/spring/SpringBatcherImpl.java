@@ -25,6 +25,7 @@ import org.opoo.oqs.TypedValue;
 import org.opoo.oqs.core.AbstractBatcher;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.opoo.oqs.core.AbstractQueryFactory;
 
 /**
  *
@@ -35,14 +36,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class SpringBatcherImpl extends AbstractBatcher {
     boolean isPrepared = false;
     private JdbcTemplate jdbcTemplate;
-    public SpringBatcherImpl(JdbcTemplate jdbcTemplate) {
-        super();
+    public SpringBatcherImpl(AbstractQueryFactory queryFactory, JdbcTemplate jdbcTemplate) {
+        super(queryFactory);
         isPrepared = false;
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public SpringBatcherImpl(JdbcTemplate jdbcTemplate, String sql) {
-        super(sql);
+    public SpringBatcherImpl(AbstractQueryFactory queryFactory, JdbcTemplate jdbcTemplate, String sql) {
+        super(queryFactory, sql);
         isPrepared = true;
         this.jdbcTemplate = jdbcTemplate;
     }

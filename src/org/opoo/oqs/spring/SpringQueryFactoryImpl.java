@@ -68,16 +68,16 @@ public class SpringQueryFactoryImpl extends AbstractQueryFactory {
      */
     public Query createQuery(String queryString) throws
             CannotCreateQueryException {
-        return new SpringQueryImpl(queryString, this, jdbcTemplate);
+        return new SpringQueryImpl(this, jdbcTemplate, queryString);
     }
 
 
     public StatementBatcher createBatcher() {
-        return new SpringBatcherImpl(jdbcTemplate);
+        return new SpringBatcherImpl(this, jdbcTemplate);
     }
 
     public PreparedStatementBatcher createBatcher(String sql) {
-        return new SpringBatcherImpl(jdbcTemplate, sql);
+        return new SpringBatcherImpl(this, jdbcTemplate, sql);
     }
 
 

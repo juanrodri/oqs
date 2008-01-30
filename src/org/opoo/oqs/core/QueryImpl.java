@@ -22,7 +22,7 @@ public class QueryImpl extends AbstractQuery {
 
     private final ConnectionManager cm;
     QueryImpl(String queryString, AbstractQueryFactory queryFactory) {
-        super(queryString, queryFactory);
+        super(queryFactory, queryString);
         cm = queryFactory.getConnectionManager();
     }
 

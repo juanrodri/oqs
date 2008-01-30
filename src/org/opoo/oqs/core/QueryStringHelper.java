@@ -63,6 +63,7 @@ public final class QueryStringHelper {
 
     /**
      * 检查 query String的正确性。主要检查()是否配对。
+     * @param msql String
      */
     public static void verifyQueryString(String msql) {
         int c1 = StringUtils.countUnquoted(msql, ')');
