@@ -108,7 +108,7 @@ public abstract class AbstractQuery implements Query {
     int maxRows = 0, fetchSize = 0, queryTimeout = 0;
 
 
-    public AbstractQuery(String queryString, AbstractQueryFactory queryFactory) {
+    public AbstractQuery(AbstractQueryFactory queryFactory, String queryString) {
         this.dialect = queryFactory.dialect;
         this.debugLevel = queryFactory.debugLevel;
         this.queryFactory = queryFactory;

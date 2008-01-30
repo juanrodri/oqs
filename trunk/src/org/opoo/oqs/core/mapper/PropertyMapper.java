@@ -28,8 +28,16 @@ import org.opoo.oqs.core.Property;
  */
 public interface PropertyMapper extends Mapper, Property {
     //int size();
+    /**
+     *
+     * @return String
+     */
     String getMapperString();
 
+    /**
+     *
+     * @return Class
+     */
     Class getReturnType();
 
     /**

@@ -30,12 +30,14 @@ import org.opoo.oqs.core.AbstractQuery;
 import org.opoo.oqs.core.AbstractQueryFactory;
 import org.opoo.oqs.jdbc.ResultSetHandler;
 import org.opoo.oqs.spring.jdbc.ArgTypePreparedStatementSetter;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.util.Assert;
 
 
 /**
@@ -46,21 +48,19 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @since OQS1.0
  */
-public class SpringQueryImpl extends AbstractQuery {
+public class SpringQueryImpl extends AbstractQuery implements InitializingBean {
     private JdbcTemplate jdbcTemplate;
     private static final Log log = LogFactory.getLog(SpringQueryImpl.class);
 
-    public SpringQueryImpl(String queryString,
-                           AbstractQueryFactory queryFactory) {
-        super(queryString, queryFactory);
-    }
-
-    public SpringQueryImpl(String queryString,
-                           AbstractQueryFactory queryFactory,
-                           JdbcTemplate jdbcTemplate) {
-        super(queryString, queryFactory);
+    public SpringQueryImpl(AbstractQueryFactory queryFactory,
+                           JdbcTemplate jdbcTemplate, String queryString) {
+        super(queryFactory, queryString);
         setJdbcTemplate(jdbcTemplate);
     }
+    public SpringQueryImpl(AbstractQueryFactory queryFactory, String queryString) {
+	super(queryFactory, queryString);
+    }
+
 
     protected ResultSetExtractor createResultSetExtractor(final
             ResultSetHandler rsh) {
@@ -188,6 +188,7 @@ public class SpringQueryImpl extends AbstractQuery {
 
     /**
      *
+     * @param timeout int
      * @return Query
      */
     public Query setQueryTimeout(int timeout) {
@@ -198,5 +199,9 @@ public class SpringQueryImpl extends AbstractQuery {
 
     protected Object queryForObject(String sql, Class clazz) {
         return jdbcTemplate.queryForObject(sql, clazz);
+    }
+
+    public void afterPropertiesSet() throws Exception {
+	Assert.notNull(jdbcTemplate, "jdbcTemplate can not be null.");
     }
 }
