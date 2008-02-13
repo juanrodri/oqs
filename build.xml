@@ -266,6 +266,45 @@
     </target>
 
 
+    <target name="pub-full" depends="init" description="Create full distribution (compressed) ready for publication based on your LOCAL CVS sources">
+        <mkdir dir="${pub.home}"/>
+        <echo>create full distribution.</echo>
+		<!-- Source properties -->
+        <property name="final-src.path" value="${pub.home}/${final.name}-src"/>
+        <property name="zip-src.path" value="${final-src.path}.zip"/>
+        <property name="tar-src.path" value="${final-src.path}.tar"/>
+        <property name="gz-src.path" value="${tar-src.path}.gz"/>
+		<property name="final-full.path" value="${pub.home}/${final.name}-full"/>
+		<property name="zip-full.path" value="${final-full.path}.zip"/>
+		<property name="tar-full.path" value="${final-full.path}.tar"/>
+		<property name="gz-full.path" value="${final-full.path}.gz"/>
+
+		<!-- Zip full dist -->
+		<zip destfile="${zip-full.path}">
+		   <zipfileset src="${zip-src.path}" prefix=""/>
+		   <zipfileset dir="${dist.home}" includes="${final.name}.jar" prefix="${final.name}/"/>
+		   <zipfileset dir="${dist.home}" includes="docs/api/**" prefix="${final.name}/"/>
+		</zip>
+        <checksum algorithm="md5" file="${zip-full.path}" fileext=".md5"/>
+        <checksum algorithm="sha" file="${zip-full.path}" fileext=".sha"/>
+
+        <!-- Tar & gzip full dist -->
+		<!-- 
+		<tar tarfile="${tar-full.path}">
+			<tarfileset src="${tar-src.path}" prefix=""/>
+		    <tarfileset dir="${dist.home}" includes="${final.name}.jar" prefix="${final.name}/"/>
+		</tar>
+        <gzip zipfile="${gz-full.path}" src="${tar-full.path}"/>
+        <checksum algorithm="md5" file="${gz-full.path}" fileext=".md5"/>
+        <checksum algorithm="sha" file="${gz-full.path}" fileext=".sha"/>
+		-->
+        <delete file="${tar-full.path}"/>
+        <!-- Delete old signatures -->
+        <delete file="${zip-full.path}.asc"/>
+        <delete file="${gz-full.path}.asc"/>
+    </target>
+
+
     <target name="pub" depends="pub-bin, pub-src" description="Create binary and source distribution (compressed) ready for publication">
     </target>
 
