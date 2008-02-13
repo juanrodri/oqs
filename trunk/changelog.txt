@@ -4,8 +4,9 @@ http://www.opoo.org
 
 
 
-Changes in version 0.1 RC2 (@RELEASE_DATE@)
+Changes in version 0.1 RC2 (2008-02-13)
 -----------------------------------------
+* fixed   多个星号的QS查询中字段数计算错误。
 * fixed   运行时必须依赖Hibernate3的BUG. OQS不再依赖Hibernate，可独立运行。
 * improve QueryFactory的属性'dialectClassName'不再是必须的，OQS根据DataSource类型判断SQL Dialect，
           前提是classpath中存在Hibernate3的类库。
