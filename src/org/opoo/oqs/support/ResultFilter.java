@@ -28,6 +28,8 @@ import org.opoo.oqs.criterion.Order;
  * @version 1.1
  */
 public class ResultFilter {
+    public static final ResultFilter EMPTY_FILTER = new ResultFilter();
+
     public static final int INVALID_INT = -1;
     private Criterion criterion;
     private Order sortSql;
@@ -36,6 +38,16 @@ public class ResultFilter {
 
     public ResultFilter() {
     }
+    public ResultFilter(Criterion c, Order order){
+	this.criterion = c;
+	this.sortSql = order;
+    }
+    public ResultFilter(Criterion c, Order o, int firstResult, int maxResults){
+	this(c, o);
+	setFirstResult(firstResult);
+	setMaxResults(maxResults);
+    }
+
 
     public void setCriterion(Criterion criterion) {
         this.criterion = criterion;
