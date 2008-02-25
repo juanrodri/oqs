@@ -17,77 +17,18 @@
  */
 package org.opoo.oqs.support;
 
-import java.util.List;
-
-import org.opoo.oqs.Query;
-import org.opoo.oqs.QueryFactory;
-import org.opoo.oqs.QueryHelper;
 import org.opoo.oqs.criterion.Criterion;
-import org.opoo.util.Assert;
+import java.util.List;
 
 /**
  *
- * @author Alex Lin(alex@opoo.org)
- * @version 1.1
+ * @author Alex Lin
+ * @version 1.0
  */
-public class QuerySupport {
-    private QueryFactory qf;
-    public QuerySupport(QueryFactory qf) {
-        this.qf = qf;
-    }
-
-    /**
-     *
-     * @param baseSql String
-     * @param c Criterion
-     * @return int
-     */
-    public int executeUpdate(String baseSql, Criterion c) {
-        return QueryHelper.createQuery(qf, baseSql, c).executeUpdate();
-    }
-
-    /**
-     *
-     * @param baseSql String
-     * @param resultFilter ResultFilter
-     * @return List
-     */
-    public List find(String baseSql, ResultFilter resultFilter) {
-        Query q = QueryHelper.createQuery(qf, baseSql,
-                                          resultFilter.getCriterion(),
-                                          resultFilter.getOrder());
-        if (resultFilter.isPageable()) {
-            q.setFirstResult(resultFilter.getFirstResult());
-            q.setMaxResults(resultFilter.getMaxResults());
-        }
-        return q.list();
-    }
-
-    /**
-     *
-     * @param baseSelectSql String
-     * @param baseCountSql String
-     * @param resultFilter ResultFilter
-     * @return PagedList
-     */
-    public PagedList find(String baseSelectSql, String baseCountSql,
-                          ResultFilter resultFilter) {
-        Assert.isTrue(resultFilter.isPageable());
-        List list = find(baseSelectSql, resultFilter);
-        int count = getCount(baseCountSql, resultFilter.getCriterion());
-        return new PagedList(list, resultFilter.getFirstResult(),
-                             resultFilter.getMaxResults(), count);
-    }
-
-    /**
-     *
-     * @param baseSql String
-     * @param c Criterion
-     * @return int
-     */
-    public int getCount(String baseSql, Criterion c) {
-        Query q = QueryHelper.createQuery(qf, baseSql, c);
-        Number number = (Number) q.uniqueResult();
-        return number.intValue();
-    }
+public interface QuerySupport {
+    int executeUpdate(String baseSql, Criterion c);
+    List find(String baseSql, ResultFilter resultFilter);
+    PagedList find(String baseSelectSql, String baseCountSql,
+                          ResultFilter resultFilter);
+    int getInt(String baseSql, Criterion c);
 }

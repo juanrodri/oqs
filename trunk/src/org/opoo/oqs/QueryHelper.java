@@ -73,5 +73,4 @@ public abstract class QueryHelper {
     public static String buildQueryString(String baseSql, Criterion c) {
         return buildQueryString(baseSql, c, null);
     }
-
 }

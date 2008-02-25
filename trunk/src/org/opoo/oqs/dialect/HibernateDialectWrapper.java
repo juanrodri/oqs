@@ -30,6 +30,9 @@ public class HibernateDialectWrapper implements Dialect {
         this.dialect = dialect;
     }
 
+    public org.hibernate.dialect.Dialect getHibernateDialect() {
+        return this.dialect;
+    }
 
     public String appendIdentitySelectToInsert(String sql) {
         return dialect.appendIdentitySelectToInsert(sql);
