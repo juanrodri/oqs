@@ -80,31 +80,33 @@ public abstract class AbstractQueryFactory implements QueryFactory,
         this.dataSource = dataSource;
         //setConnectionManager(new TransactionSupportConnectionManager(dataSource));
         this.connectionManager = createConnectionManager(dataSource);
+    }
 
-        String databaseName = null;
-        int databaseMajorVersion = 0;
-        Connection conn = null;
-        try {
-            conn = connectionManager.getConnection();
-            DatabaseMetaData meta = conn.getMetaData();
-            databaseName = meta.getDatabaseProductName();
-            databaseMajorVersion = getDatabaseMajorVersion(meta);
-            log.info("RDBMS: " + databaseName + ", version: " +
-                     meta.getDatabaseProductVersion());
-            log.info("JDBC driver: " + meta.getDriverName() + ", version: " +
-                     meta.getDriverVersion());
-        } catch (SQLException sqle) {
-            log.warn("Could not obtain connection metadata", sqle);
-        } catch (UnsupportedOperationException uoe) {
-            // user supplied JDBC connections
-        } finally {
-            connectionManager.releaseConnection(conn);
+    public void afterPropertiesSet() {
+	String databaseName = null;
+	int databaseMajorVersion = 0;
+	Connection conn = null;
+	try {
+	    conn = connectionManager.getConnection();
+	    DatabaseMetaData meta = conn.getMetaData();
+	    databaseName = meta.getDatabaseProductName();
+	    databaseMajorVersion = getDatabaseMajorVersion(meta);
+	    log.info("RDBMS: " + databaseName + ", version: " +
+		     meta.getDatabaseProductVersion());
+	    log.info("JDBC driver: " + meta.getDriverName() + ", version: " +
+		     meta.getDriverVersion());
+	} catch (SQLException sqle) {
+	    log.warn("Could not obtain connection metadata", sqle);
+	} catch (UnsupportedOperationException uoe) {
+	    // user supplied JDBC connections
+	} finally {
+	    connectionManager.releaseConnection(conn);
         }
-
         if (dialect == null) {
             dialect = this.determineDialect(databaseName, databaseMajorVersion);
         }
     }
+
     /**
        * 根据数据源创建ConnectionManager
        * @param ds DataSource
@@ -141,7 +143,7 @@ public abstract class AbstractQueryFactory implements QueryFactory,
 	    if(object.getClass().getName().startsWith("org.hibernate.dialect."))
 	    {
 		//if (object instanceof org.hibernate.dialect.Dialect) {
-                setDialect((org.hibernate.dialect.Dialect) object);
+		dialect = new HibernateDialectWrapper((org.hibernate.dialect.Dialect)object);
             } else {
                 dialect = (Dialect) object;
             }
@@ -151,10 +153,6 @@ public abstract class AbstractQueryFactory implements QueryFactory,
     }
     public void setDialect(String dialectClassName){
 	setDialectClassName(dialectClassName);
-    }
-
-    private void setDialect(org.hibernate.dialect.Dialect dialect) {
-        this.dialect = new HibernateDialectWrapper(dialect);
     }
 
     public void setBeanClassLoader(ClassLoader classLoader) {
