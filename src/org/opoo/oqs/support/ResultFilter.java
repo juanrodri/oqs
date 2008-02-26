@@ -29,12 +29,12 @@ import org.opoo.oqs.criterion.Order;
  */
 public class ResultFilter {
     public static final ResultFilter EMPTY_FILTER = new ResultFilter();
-
     public static final int INVALID_INT = -1;
+    public static int MAX_RESULTS = 20;
     private Criterion criterion;
     private Order sortSql;
     private int firstResult = INVALID_INT;
-    private int maxResults = 20;
+    private int maxResults = MAX_RESULTS;
 
     public ResultFilter() {
     }
@@ -115,7 +115,11 @@ public class ResultFilter {
         return str;
     }
 
-    public static ResultFilter createDefaultResultFilter() {
+    public static ResultFilter createEmptyResultFilter() {
         return new ResultFilter();
+    }
+
+    public static ResultFilter createPageableResultFilter(int firstResult, int maxResults){
+	return new ResultFilter(null, null, firstResult, maxResults);
     }
 }
