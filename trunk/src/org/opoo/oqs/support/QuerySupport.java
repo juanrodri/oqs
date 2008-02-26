@@ -28,7 +28,6 @@ import java.util.List;
 public interface QuerySupport {
     int executeUpdate(String baseSql, Criterion c);
     List find(String baseSql, ResultFilter resultFilter);
-    PagedList find(String baseSelectSql, String baseCountSql,
-                          ResultFilter resultFilter);
+    PageableList find(String baseSelectSql, String baseCountSql, ResultFilter resultFilter);
     int getInt(String baseSql, Criterion c);
 }

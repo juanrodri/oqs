@@ -72,12 +72,12 @@ public class OqsQuerySupport implements QuerySupport, QueryAware{
      * @param resultFilter ResultFilter
      * @return PagedList
      */
-    public PagedList find(String baseSelectSql, String baseCountSql,
+    public PageableList find(String baseSelectSql, String baseCountSql,
                           ResultFilter resultFilter) {
         Assert.isTrue(resultFilter.isPageable());
         List list = find(baseSelectSql, resultFilter);
         int count = getInt(baseCountSql, resultFilter.getCriterion());
-        return new PagedList(list, resultFilter.getFirstResult(),
+        return new PageableList(list, resultFilter.getFirstResult(),
                              resultFilter.getMaxResults(), count);
     }
 
