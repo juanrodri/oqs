@@ -80,6 +80,10 @@ public class Paginator {
         return (getPageIndex() + 1) * pageable.getPageSize();
     }
 
+    public int getLastPageStartIndex() {
+        return (getPageCount() - 1) * pageable.getPageSize();
+    }
+
     public Page[] getPages() {
         return getPages(10);
     }
