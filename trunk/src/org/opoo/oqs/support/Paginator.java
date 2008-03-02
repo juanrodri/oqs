@@ -75,6 +75,12 @@ public class Paginator {
     public boolean hasNextPage() {
         return getPageIndex() + 1 < getPageCount();
     }
+    public boolean isHasNext(){
+	return hasNextPage();
+    }
+    public boolean isHasPrevious(){
+	return hasPreviousPage();
+    }
 
     public int getNextPageStartIndex() {
         return (getPageIndex() + 1) * pageable.getPageSize();
@@ -135,8 +141,27 @@ public class Paginator {
                     pageList.add(0, Page.FIRST);
                 }
             }
-            pages = (Page[]) (Page[]) pageList.toArray(new Page[0]);
+            pages = (Page[]) pageList.toArray(new Page[pageList.size()]);
         }
         return pages;
+    }
+
+    public static void main(String[] args) {
+	Pageable p = new Pageable(){
+            public int getItemCount() {
+                return 16;
+            }
+
+            public int getPageSize() {
+                return 3;
+            }
+
+            public int getStartIndex() {
+                return 0;
+            }
+        };
+	Paginator pp = new Paginator(p);
+	Page[] pages = pp.getPages();
+	System.out.println(pages.length);
     }
 }
