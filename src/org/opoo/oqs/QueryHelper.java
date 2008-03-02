@@ -34,10 +34,12 @@ public abstract class QueryHelper {
                                     Criterion c, Order order) {
         String qs = buildQueryString(baseSql, c, order);
         Query q = qf.createQuery(qs);
-        Object[] values = c.getValues();
-        Type[] types = c.getTypes();
-        if (values != null && values.length > 0) {
-            q.setParameters(values, types);
+	if(c != null){
+            Object[] values = c.getValues();
+            Type[] types = c.getTypes();
+            if (values != null && values.length > 0) {
+                q.setParameters(values, types);
+            }
         }
         return q;
     }

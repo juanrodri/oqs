@@ -17,6 +17,8 @@
  */
 package org.opoo.oqs.support;
 
+import java.util.List;
+
 import org.opoo.util.Assert;
 
 /**
@@ -25,9 +27,11 @@ import org.opoo.util.Assert;
  * @version 1.0
  */
 public abstract class PageUtils {
-    public static PageableList findPageableList(PageLoader action, ResultFilter r) {
-        Assert.isTrue(r.isPageable());
-        return new PageableList(action.find(r), r.getFirstResult(),
-                             r.getMaxResults(), action.getCount(r));
+
+    public static PageableList findPageableList(PageLoader pageLoader, ResultFilter r){
+	Assert.isTrue(r.isPageable(), "必须包含分页参数");
+	List list = pageLoader.find(r);
+	int count = pageLoader.getCount(r);
+	return new PageableList(list, r.getFirstResult(), r.getMaxResults(), count);
     }
 }
