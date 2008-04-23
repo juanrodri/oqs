@@ -19,6 +19,8 @@ package org.opoo.oqs.criterion;
 
 import java.util.Collection;
 
+import org.opoo.oqs.type.Type;
+
 /**
  *
  * @author Alex Lin(alex@opoo.org)
@@ -28,41 +30,76 @@ public abstract class Restrictions { //implements Criterion
     public static SimpleExpression eq(String name, Object value) {
         return new SimpleExpression(name, value, "=");
     }
-
+    public static SimpleExpression eq(String name, Object value, Type type) {
+	return new SimpleExpression(name, value, type, "=");
+    }
     public static SimpleExpression ne(String name, Object value) {
         return new SimpleExpression(name, value, "<>");
+    }
+    public static SimpleExpression ne(String name, Object value, Type type) {
+	return new SimpleExpression(name, value, type, "<>");
     }
 
     public static SimpleExpression ge(String name, Object value) {
         return new SimpleExpression(name, value, ">=");
+    }
+    public static SimpleExpression ge(String name, Object value, Type type) {
+	return new SimpleExpression(name, value, type, ">=");
     }
 
     public static SimpleExpression gt(String name, Object value) {
         return new SimpleExpression(name, value, ">");
     }
 
+    public static SimpleExpression gt(String name, Object value, Type type) {
+	return new SimpleExpression(name, value, type, ">");
+    }
+
     public static SimpleExpression le(String name, Object value) {
         return new SimpleExpression(name, value, "<=");
+    }
+
+    public static SimpleExpression le(String name, Object value, Type type) {
+	return new SimpleExpression(name, value, type, "<=");
     }
 
     public static SimpleExpression lt(String name, Object value) {
         return new SimpleExpression(name, value, "<");
     }
 
+    public static SimpleExpression lt(String name, Object value, Type type) {
+	return new SimpleExpression(name, value, type, "<");
+    }
+
     public static Criterion in(String name, Object[] values) {
         return new In(name, values);
+    }
+    public static Criterion in(String name, Object[] values, Type type) {
+	return new In(name, values, type);
     }
 
     public static Criterion in(String name, Collection values) {
         return new In(name, values.toArray());
     }
 
+    public static Criterion in(String name, Collection values, Type type) {
+	    return new In(name, values.toArray(), type);
+    }
+
     public static SimpleExpression like(String name, Object value) {
         return new SimpleExpression(name, value, " like ");
     }
 
+    public static SimpleExpression like(String name, Object value, Type type) {
+	return new SimpleExpression(name, value, type, " like ");
+    }
+
     public static SimpleExpression ilike(String name, Object value) {
         return new SimpleExpression(name, value, " ilike ");
+    }
+
+    public static SimpleExpression ilike(String name, Object value, Type type) {
+	return new SimpleExpression(name, value, type, " ilike ");
     }
 
     public static Criterion isNull(String name) {
@@ -75,6 +112,14 @@ public abstract class Restrictions { //implements Criterion
 
     public static Criterion sql(String sql, Object[] values) {
         return new SqlCriterion(sql, values);
+    }
+
+    public static Criterion sql(String sql, Object[] values, Type[] types) {
+	return new SqlCriterion(sql, values, types);
+    }
+
+    public static Criterion sql(String sql) {
+	return new SqlCriterion(sql, null);
     }
 
     public static Logic logic(Criterion c) {

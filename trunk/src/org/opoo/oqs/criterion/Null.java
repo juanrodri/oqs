@@ -20,6 +20,7 @@ package org.opoo.oqs.criterion;
 
 import org.opoo.oqs.type.Type;
 import org.opoo.util.ArrayUtils;
+import org.opoo.util.Assert;
 
 /**
  *
@@ -29,11 +30,12 @@ import org.opoo.util.ArrayUtils;
 public class Null implements Criterion {
     private final String string;
     public Null(String name) {
+	Assert.notNull(name, "criterion name can not be null");
         string = name + " is null";
     }
 
     public Object[] getValues() {
-        return ArrayUtils.EMPTY_OBJECT_ARRAY;
+        return null;//ArrayUtils.EMPTY_OBJECT_ARRAY;
     }
 
     public String toString() {
