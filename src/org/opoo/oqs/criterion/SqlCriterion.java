@@ -19,6 +19,7 @@ package org.opoo.oqs.criterion;
 
 import org.opoo.oqs.type.Type;
 import org.opoo.oqs.type.TypeFactory;
+import org.opoo.util.Assert;
 
 /**
  *
@@ -28,17 +29,26 @@ import org.opoo.oqs.type.TypeFactory;
 public class SqlCriterion implements Criterion {
     private final String sql;
     private final Object[] values;
-    private final Type[] types;
+    private Type[] types;
     public SqlCriterion(String sql, Object[] values) {
+	Assert.notNull(sql);
         this.sql = sql;
         this.values = values;
-        types = new Type[values.length];
-        for (int i = 0; i < values.length; i++) {
-            types[i] = TypeFactory.guessType(values[i]);
-        }
+	if(values != null){
+            if(values.length != 0){
+                types = new Type[values.length];
+                for (int i = 0; i < values.length; i++) {
+                    types[i] = TypeFactory.guessType(values[i]);
+                }
+            }else{
+		values = null;
+		types = null;
+	    }
+	}
     }
 
     public SqlCriterion(String sql, Object[] values, Type[] types) {
+	Assert.notNull(sql);
         this.sql = sql;
         this.values = values;
         this.types = types;

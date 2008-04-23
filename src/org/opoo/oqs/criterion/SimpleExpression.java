@@ -19,6 +19,7 @@ package org.opoo.oqs.criterion;
 
 import org.opoo.oqs.type.Type;
 import org.opoo.oqs.type.TypeFactory;
+import org.opoo.util.Assert;
 
 /**
  *
@@ -31,13 +32,16 @@ public class SimpleExpression implements Criterion {
     private Object value;
     private Type type;
     public SimpleExpression(String name, Object value, Type type, String op) {
+	Assert.notNull(name, "criterion name can not be null");
+	Assert.notNull(value, "criterion value can not be null");
+	Assert.notNull(type, "criterion type can not be null");
         qs = name + op + "?";
         this.value = value;
         this.type = type;
     }
 
     public SimpleExpression(String name, Object value, String op) {
-        this(name, value, TypeFactory.guessType(value), op);
+        this(name, value, value == null ? null : TypeFactory.guessType(value), op);
     }
 
     public Object[] getValues() {
@@ -50,9 +54,6 @@ public class SimpleExpression implements Criterion {
     }
 
     public Type[] getTypes() {
-        if (type != null) {
-            return new Type[] {type};
-        }
-        return null;
+        return new Type[] {type};
     }
 }

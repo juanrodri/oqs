@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import org.opoo.oqs.type.Type;
 import org.opoo.oqs.type.TypeFactory;
+import org.opoo.util.Assert;
 import org.opoo.util.StringUtils;
 
 public class In implements Criterion {
@@ -32,7 +33,16 @@ public class In implements Criterion {
         this(name, values, null);
     }
 
+    /**
+     * ÔÊÐí¿ÕÊý×é¡£
+     * @param name String
+     * @param values Object[]
+     * @param type Type
+     */
     public In(String name, Object[] values, Type type) {
+	Assert.notNull(name, "criterion name can not be null");
+	Assert.notNull(values, "criterion values cannot be null");
+	//Assert.notEmpty();
         this.values = values;
         qs = name + " in (" + StringUtils.fillToString("?", ", ", values.length) +
              ")";
@@ -48,7 +58,9 @@ public class In implements Criterion {
             }
         }
         types = new Type[values.length];
-        Arrays.fill(types, type);
+	if(values.length > 0){
+            Arrays.fill(types, type);
+        }
     }
 
     public Object[] getValues() {

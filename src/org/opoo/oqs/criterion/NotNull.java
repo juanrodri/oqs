@@ -18,7 +18,7 @@
 package org.opoo.oqs.criterion;
 
 import org.opoo.oqs.type.Type;
-import org.opoo.util.ArrayUtils;
+import org.opoo.util.*;
 
 /**
  *
@@ -29,11 +29,12 @@ import org.opoo.util.ArrayUtils;
 public class NotNull implements Criterion {
     private final String string;
     public NotNull(String name) {
+	Assert.notNull(name, "criterion name can not be null");
         string = name + " is not null";
     }
 
     public Object[] getValues() {
-        return ArrayUtils.EMPTY_OBJECT_ARRAY;
+        return null;//ArrayUtils.EMPTY_OBJECT_ARRAY;
     }
 
     public String toString() {

@@ -17,6 +17,9 @@
  */
 package org.opoo.oqs.criterion;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opoo.oqs.type.Type;
 import org.opoo.util.ArrayUtils;
 import org.opoo.util.Assert;
@@ -28,6 +31,7 @@ import org.opoo.util.Assert;
  * @version 1.0
  */
 public class Logic implements Criterion {
+    private static final Log log = LogFactory.getLog(Logic.class);
     private int criterionCount = 0;
     private StringBuffer qs = null;
     private Object[] values = null;
@@ -44,6 +48,12 @@ public class Logic implements Criterion {
 
     private void addCriterion(Criterion criterion, String op) {
         Assert.notNull(criterion, "criterion cannot be null");
+	String nqs = criterion.toString();
+	if(StringUtils.isBlank(nqs)){
+	    log.debug("ignore empty criterion: " + criterion);
+	    return;
+	}
+
         Object[] vals = criterion.getValues();
         Type[] tps = criterion.getTypes();
 
@@ -69,9 +79,9 @@ public class Logic implements Criterion {
             criterionCount++;
         }
         if (moreThanOne) {
-            qs.append(op + "(" + criterion.toString() + ")");
+            qs.append(op + "(" + nqs + ")");
         } else {
-            qs.append(op + criterion.toString());
+            qs.append(op + nqs);
         }
     }
 
@@ -90,7 +100,7 @@ public class Logic implements Criterion {
     }
 
     public Object[] getValues() {
-        if (values.length == 0) {
+        if (ArrayUtils.isEmpty(values)) {
             return null;
         }
         return values;
@@ -104,7 +114,7 @@ public class Logic implements Criterion {
     }
 
     public Type[] getTypes() {
-        if (types.length == 0) {
+        if (ArrayUtils.isEmpty(types)) {
             return null;
         }
         return types;
