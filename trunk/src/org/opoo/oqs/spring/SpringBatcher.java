@@ -33,16 +33,16 @@ import org.opoo.oqs.core.AbstractQueryFactory;
  * @author Alex Lin(alex@opoo.org)
  * @version 1.0
  */
-public class SpringBatcherImpl extends AbstractBatcher {
+public class SpringBatcher extends AbstractBatcher {
     boolean isPrepared = false;
     private JdbcTemplate jdbcTemplate;
-    public SpringBatcherImpl(AbstractQueryFactory queryFactory, JdbcTemplate jdbcTemplate) {
+    public SpringBatcher(AbstractQueryFactory queryFactory, JdbcTemplate jdbcTemplate) {
         super(queryFactory);
         isPrepared = false;
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public SpringBatcherImpl(AbstractQueryFactory queryFactory, JdbcTemplate jdbcTemplate, String sql) {
+    public SpringBatcher(AbstractQueryFactory queryFactory, JdbcTemplate jdbcTemplate, String sql) {
         super(queryFactory, sql);
         isPrepared = true;
         this.jdbcTemplate = jdbcTemplate;

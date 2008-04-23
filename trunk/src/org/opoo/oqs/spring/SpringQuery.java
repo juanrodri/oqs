@@ -48,16 +48,16 @@ import org.springframework.util.Assert;
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @since OQS1.0
  */
-public class SpringQueryImpl extends AbstractQuery implements InitializingBean {
+public class SpringQuery extends AbstractQuery implements InitializingBean {
     private JdbcTemplate jdbcTemplate;
-    private static final Log log = LogFactory.getLog(SpringQueryImpl.class);
+    private static final Log log = LogFactory.getLog(SpringQuery.class);
 
-    public SpringQueryImpl(AbstractQueryFactory queryFactory,
+    public SpringQuery(AbstractQueryFactory queryFactory,
                            JdbcTemplate jdbcTemplate, String queryString) {
         super(queryFactory, queryString);
         setJdbcTemplate(jdbcTemplate);
     }
-    public SpringQueryImpl(AbstractQueryFactory queryFactory, String queryString) {
+    public SpringQuery(AbstractQueryFactory queryFactory, String queryString) {
 	super(queryFactory, queryString);
     }
 
@@ -182,6 +182,7 @@ public class SpringQueryImpl extends AbstractQuery implements InitializingBean {
      * @see JdbcTemplate#setFetchSize
      */
     public Query setFetchSize(int fetchSize) {
+	super.setFetchSize(fetchSize);
         jdbcTemplate.setFetchSize(fetchSize);
         return this;
     }
