@@ -1,5 +1,5 @@
 /*
- * $Id: HibernateQueryHelper.java 1.0 2008年2月25日 下午05时01分04秒 $
+ * $Id$
  *
  * Copyright 2006-2008 Alex Lin. All rights reserved.
  *

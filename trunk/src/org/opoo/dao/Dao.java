@@ -1,5 +1,5 @@
 /*
- * $Id: Dao.java 1.0 2008Äê4ÔÂ15ÈÕ Alex Lin(alex@opoo.org) $
+ * $Id$
  *
  * Copyright 2006-2008 Alex Lin. All rights reserved.
  *
