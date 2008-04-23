@@ -71,6 +71,13 @@ public class QueryHolder implements Serializable {
         return this;
     }
 
+    public QueryHolder add(Object[] values, Type[] types){
+	for (int i = 0; i < values.length; i++) {
+	    add(values[i], types[i]);
+	}
+	return this;
+    }
+
     public QueryHolder addInt(int value) {
         return add(new Integer(value), Type.INTEGER);
     }

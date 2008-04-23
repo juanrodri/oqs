@@ -51,24 +51,23 @@ public abstract class QueryHelper {
 
     public static String buildQueryString(String baseSql, Criterion c,
                                           Order order) {
-        if (c == null) {
-            return baseSql;
-        }
-        String cs = c.toString();
-        if (StringUtils.isBlank(cs)) {
-            return baseSql;
+        if (c != null) {
+            String cs = c.toString();
+            if (StringUtils.isNotBlank(cs)) {
+                int i = baseSql.toLowerCase().indexOf(WHERE);
+                if (i == -1) {
+                    baseSql += WHERE;
+                } else {
+                    baseSql += " and ";
+                }
+                baseSql += cs;
+            }
         }
 
-        int i = baseSql.toLowerCase().indexOf(WHERE);
-        if (i == -1) {
-            baseSql += WHERE;
-        } else {
-            baseSql += " and ";
-        }
-        baseSql += cs;
         if (order != null) {
             baseSql += " order by " + order.toString();
         }
+
         return baseSql;
     }
 
