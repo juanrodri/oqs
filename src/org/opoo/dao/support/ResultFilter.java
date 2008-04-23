@@ -1,5 +1,5 @@
 /*
- * $Id: ResultFilter.java 54 2008-02-26 08:08:31Z alex@opoo.org $
+ * $Id$
  *
  * Copyright 2006-2008 Alex Lin. All rights reserved.
  *

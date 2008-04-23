@@ -1,5 +1,5 @@
 /*
- * $Id: Page.java 19 2008-01-17 15:21:16Z alex@opoo.org $
+ * $Id$
  *
  * Copyright 2006-2008 Alex Lin. All rights reserved.
  *

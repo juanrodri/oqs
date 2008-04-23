@@ -1,5 +1,5 @@
 /*
- * $Id: Paginator.java 56 2008-03-02 13:50:21Z alex@opoo.org $
+ * $Id$
  *
  * Copyright 2006-2008 Alex Lin. All rights reserved.
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: QuerySupport.java 49 2008-02-26 01:45:15Z alex@opoo.org $
+ * $Id$
  *
  * Copyright 2006-2008 Alex Lin. All rights reserved.
  *
