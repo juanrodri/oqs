@@ -31,6 +31,7 @@ import org.opoo.oqs.jdbc.DataAccessException;
 import org.opoo.oqs.spring.transaction.SpringJdbcTransactionFactory;
 import org.opoo.oqs.transaction.Transaction;
 import org.opoo.oqs.transaction.TransactionException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
@@ -43,20 +44,32 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @since OQS1.0
  */
-public class SpringQueryFactoryImpl extends AbstractQueryFactory {
+public class SpringQueryFactory extends AbstractQueryFactory implements
+        InitializingBean {
     private JdbcTemplate jdbcTemplate;
 
-    public SpringQueryFactoryImpl() {
+    public SpringQueryFactory() {
     }
 
-    public SpringQueryFactoryImpl(DataSource dataSource) {
+    public SpringQueryFactory(DataSource dataSource) {
         this.setDataSource(dataSource);
     }
 
     public void setDataSource(DataSource ds) {
         super.setDataSource(ds);
-        jdbcTemplate = new JdbcTemplate(ds);
+        jdbcTemplate = createJdbcTemplate(ds);
     }
+
+    protected JdbcTemplate createJdbcTemplate(DataSource dataSource) {
+	    return new JdbcTemplate(dataSource);
+    }
+
+    public final void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+
+
 
     /**
      * ´´½¨<tt>Query</tt>ÊµÀý.
@@ -68,16 +81,16 @@ public class SpringQueryFactoryImpl extends AbstractQueryFactory {
      */
     public Query createQuery(String queryString) throws
             CannotCreateQueryException {
-        return new SpringQueryImpl(this, jdbcTemplate, queryString);
+        return new SpringQuery(this, jdbcTemplate, queryString);
     }
 
 
     public StatementBatcher createBatcher() {
-        return new SpringBatcherImpl(this, jdbcTemplate);
+        return new SpringBatcher(this, jdbcTemplate);
     }
 
     public PreparedStatementBatcher createBatcher(String sql) {
-        return new SpringBatcherImpl(this, jdbcTemplate, sql);
+        return new SpringBatcher(this, jdbcTemplate, sql);
     }
 
 
@@ -96,6 +109,7 @@ public class SpringQueryFactoryImpl extends AbstractQueryFactory {
             }
         };
     }
+
 
 
     /**
