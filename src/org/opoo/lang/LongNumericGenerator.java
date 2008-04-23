@@ -1,5 +1,5 @@
 /*
- * $Id: LongNumericGenerator.java 1.0 08-1-3 обнГ10:30 $
+ * $Id$
  *
  * Copyright 2005 the original author or authors.
  *
