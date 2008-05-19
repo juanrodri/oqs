@@ -288,5 +288,14 @@ public class DefaultSelectParser implements SelectParser {
 
 
     public static void main(String[] args) {
+	Pattern p = Pattern.compile("\\S*\\$\\{(\\w+)\\}\\S*");
+        Matcher m = p.matcher("${home}/test.dir.12345678");
+        boolean b = m.matches();
+	System.out.println(b);
+	System.out.println(m.groupCount());
+        System.out.println(m.group(1));
+
+    String s = "${home}/test.dir.12345678".replaceAll("\\$\\{(\\w+)\\}", "abcd.home");
+    System.out.println(s);
     }
 }
