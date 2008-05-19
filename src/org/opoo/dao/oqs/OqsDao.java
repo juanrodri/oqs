@@ -31,6 +31,7 @@ import org.opoo.oqs.Mapper;
 import org.opoo.oqs.Query;
 import org.opoo.oqs.QueryHelper;
 import org.opoo.oqs.jdbc.DataAccessException;
+import org.opoo.oqs.criterion.Criterion;
 
 
 /**
@@ -87,6 +88,11 @@ public abstract class OqsDao<T extends Entity<K>, K extends Serializable> extend
 	return getQueryFactory().createQuery(sql).setParameterList("ids", ids)
 		.executeUpdate();
     }
+
+    public int remove(Criterion criterion) throws DataAccessException {
+	return getQuerySupport().executeUpdate("delete from " + getTableName(), criterion);
+    }
+
 
     public T get(K id) throws DataAccessException {
 	String sql = "select * from " + getTableName() + " where "

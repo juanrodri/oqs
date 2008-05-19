@@ -32,6 +32,8 @@ import org.opoo.dao.support.PageableList;
 import org.opoo.dao.support.ResultFilter;
 import org.opoo.oqs.jdbc.DataAccessException;
 import org.springframework.orm.hibernate3.HibernateCallback;
+import org.opoo.oqs.criterion.*;
+import org.hibernate.*;
 
 /**
  *
@@ -83,6 +85,15 @@ public abstract class HibernateDao<T extends Entity<K>, K extends Serializable> 
 	String sql = "delete from " + getEntityName() + " where "
 		     + getIdProperty() + " in (:ids)";
         return getQuerySupport().executeUpdate(sql, "ids", ids);
+    }
+
+    public int remove(final Criterion c) throws DataAccessException {
+        String sql = "delete from " + getEntityName();
+        if (c != null) {
+	    return getQuerySupport().executeUpdate(sql, c);
+        } else {
+            return getQuerySupport().executeUpdate(sql);
+        }
     }
 
     public T get(K id) throws DataAccessException {

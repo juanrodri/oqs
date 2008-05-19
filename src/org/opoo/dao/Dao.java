@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.opoo.dao.support.PageableList;
 import org.opoo.dao.support.ResultFilter;
+import org.opoo.oqs.criterion.Criterion;
 import org.opoo.oqs.jdbc.DataAccessException;
 
 /**
@@ -35,6 +36,7 @@ public interface Dao<T extends Entity<K>, K extends Serializable> {
     int delete(T entity) throws DataAccessException;
     int remove(K id) throws DataAccessException;
     int remove(K[] ids) throws DataAccessException;
+    int remove(Criterion criterion) throws DataAccessException;
     T get(K id) throws DataAccessException;
 
     List<T> find() throws DataAccessException;
