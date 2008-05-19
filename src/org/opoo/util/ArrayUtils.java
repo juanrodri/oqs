@@ -17,12 +17,12 @@
  */
 package org.opoo.util;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.lang.reflect.Array;
 
 /**
  * 数组操作助手类。
