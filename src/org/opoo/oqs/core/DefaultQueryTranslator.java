@@ -18,9 +18,9 @@
 package org.opoo.oqs.core;
 
 import org.opoo.oqs.Mapper;
+import org.opoo.oqs.QueryException;
 import org.opoo.util.Assert;
-import org.opoo.util.*;
-import org.opoo.oqs.*;
+import org.opoo.util.StringUtils;
 
 /**
  *
