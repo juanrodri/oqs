@@ -32,12 +32,33 @@ public class Paginator {
     private Pageable pageable;
     private int pageCount = -1;
     private Page pages[];
+    private int pageIndex = 0;
+
+
+    private Page current,next,previous,last;
     public Paginator(Pageable pageable) {
         String msg = "无法处理分页";
         Assert.notNull(pageable, msg);
         this.pageable = pageable;
         pageCount = (int) Math.ceil((double) pageable.getItemCount()
                                     / (double) pageable.getPageSize());
+
+	if(pageable.getPageSize() != 0){
+	    pageIndex = pageable.getStartIndex() / pageable.getPageSize();
+	}
+
+	current = new Page(pageIndex + 1, pageable.getStartIndex());
+	if(hasPreviousPage()){
+	    previous = Page.getPrevious(current, pageable.getPageSize());
+	}
+	if(hasNextPage()){
+	    next = Page.getNext(current, pageable.getPageSize());
+	}
+	if(pageCount == 1){
+	    last = current;
+	}else{
+	    last = new Page(pageCount, (pageCount - 1) * pageable.getPageSize());
+	}
     }
 
     public int getStartIndex() {
@@ -45,11 +66,13 @@ public class Paginator {
     }
 
     public int getPageIndex() {
-        if (pageable.getPageSize() == 0) {
-            return 0;
-        } else {
-            return pageable.getStartIndex() / pageable.getPageSize();
-        }
+        /*
+                        if (pageable.getPageSize() == 0) {
+                            return 0;
+                        } else {
+         return pageable.getStartIndex() / pageable.getPageSize();
+                        }*/
+        return pageIndex;
     }
 
     public int getPageSize() {
@@ -64,8 +87,16 @@ public class Paginator {
         return pageable.getItemCount();
     }
 
+    public Page getCurrentPage() {
+	return current;
+    }
+
     public boolean hasPreviousPage() {
         return getPageIndex() > 0;
+    }
+
+    public Page getPreviousPage(){
+	return previous;
     }
 
     public int getPreviousPageStartIndex() {
@@ -82,6 +113,11 @@ public class Paginator {
 	return hasPreviousPage();
     }
 
+
+    public Page getNextPage() {
+        return next;
+    }
+
     public int getNextPageStartIndex() {
         return (getPageIndex() + 1) * pageable.getPageSize();
     }
@@ -89,9 +125,51 @@ public class Paginator {
     public int getLastPageStartIndex() {
         return (getPageCount() - 1) * pageable.getPageSize();
     }
+    public Page getLastPage(){
+	return last;
+    }
 
     public Page[] getPages() {
-        return getPages(10);
+        if (pages == null) {
+            List<Page> pageList = new ArrayList<Page>(10);
+            if (pageCount <= 10) {
+                for (int i = 0; i < pageCount; i++) {
+                    Page p = new Page(i + 1, i * pageable.getPageSize());
+                    pageList.add(p);
+                }
+            } else {
+		int start = 0;
+		int end = start + 9;
+		if(pageIndex >= 5){
+		    if(pageCount - pageIndex < 5){
+			start = pageCount - 9;
+			end = pageCount;
+		    }else{
+                        start = pageIndex - 4;
+                        end = start + 9;
+                    }
+		}
+
+		for(int i = start ; i < end ; i++){
+		    Page p = new Page(i + 1, i * pageable.getPageSize());
+                    pageList.add(p);
+		}
+
+		if(pageIndex >= 5){
+		    pageList.add(0, null);
+		    pageList.add(0, Page.FIRST);
+		}
+		if(pageCount - pageIndex > 5){
+		    pageList.add(null);
+		    pageList.add(last);
+		}
+
+
+            }
+    	  pages = pageList.toArray(new Page[0]);
+	}
+        //return getPages(10);
+	return pages;
     }
 
     public Page[] getPages(int numViewablePages) {
@@ -149,7 +227,7 @@ public class Paginator {
     public static void main(String[] args) {
 	Pageable p = new Pageable(){
             public int getItemCount() {
-                return 16020;
+                return 103;
             }
 
             public int getPageSize() {
@@ -157,14 +235,17 @@ public class Paginator {
             }
 
             public int getStartIndex() {
-                return 660;
+                return 50;
             }
         };
+
 	Paginator pp = new Paginator(p);
-	Page[] pages = pp.getPages(10);
-	System.out.println(pages.length);
+	System.out.println("第" + (pp.getPageIndex() + 1) + "/" +  pp.pageCount);
+	//System.out.println(pp.getPageIndex() + 1);
+	Page[] pages = pp.getPages();
+
 	for(int i = 0 ; i < pages.length ; i++){
-	    System.out.println(pages[i] != null ? pages[i].getNumber() : 0);
+	    System.out.println(pages[i] != null ? pages[i].getNumber() + "" : "...");
 	}
 	System.out.println(pages);
     }

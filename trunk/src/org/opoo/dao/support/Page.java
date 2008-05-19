@@ -27,7 +27,7 @@ public class Page {
     private int number;
     private int start;
 
-    private Page(int number, int start) {
+    Page(int number, int start) {
         this.number = number;
         this.start = start;
     }

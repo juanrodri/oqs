@@ -29,6 +29,7 @@ import org.opoo.dao.support.PageableList;
 import org.opoo.dao.support.ResultFilter;
 import org.opoo.oqs.jdbc.DataAccessException;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
+import org.opoo.oqs.criterion.Criterion;
 
 
 public abstract class SqlMapDao<T extends Entity<K>, K extends Serializable> extends SqlMapClientDaoSupport implements Dao<T, K>, PageLoader {
@@ -72,6 +73,12 @@ public abstract class SqlMapDao<T extends Entity<K>, K extends Serializable> ext
 	}
         return ids.length;
     }
+
+    public int remove(Criterion criterion) throws DataAccessException {
+
+        return 0;
+    }
+
 
     public T get(K id) throws DataAccessException {
 	return (T)getSqlMapClientTemplate().queryForObject("get", id);
